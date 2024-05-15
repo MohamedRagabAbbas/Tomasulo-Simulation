@@ -33,7 +33,7 @@ class Instruction {
     int src2;
     int imm;
     Instruction(int instructionId, string inst) {
-        stringstream stream(inst);
+        stringstream stream(inst,',');
         string inst_op, inst_dest, inst_src1, inst_src2;
         ss >> inst_op;
 
