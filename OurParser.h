@@ -1,5 +1,5 @@
-#ifndef INSTRUCTION_H
-#define INSTRUCTION_H
+#ifndef OURPARSER_H
+#define OURPARSER_H
 
 #include <iostream>
 #include <sstream>

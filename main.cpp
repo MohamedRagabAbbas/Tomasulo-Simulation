@@ -1,7 +1,10 @@
 #include <iostream>
+#include "Tomasulo.h"
+
 using namespace std;
 
 int main()
 {
-    cout << "Hello World" << std::endl;
+    Tomasulo t;
+    t.taskManager();
 }
