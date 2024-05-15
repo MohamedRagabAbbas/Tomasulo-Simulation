@@ -26,25 +26,16 @@ public:
     int imm;
 
     Instruction(int instructionId, const string& inst) : instructionId(instructionId), dest(-1), src1(-1), src2(-1), imm(-1) {
-        stringstream ss(inst);
         string inst_op;
-        vector<string> inst_load_store_vector;
-        vector<string> inst_arithmetic_vector;
-        vector<string> inst_branch_vector;
-        vector<string> inst_call_vector;
-        vector<string> inst_ret_vector;
         string word;
         bool first_time = true;
+        int comma_count = 0;
         for (int i = 0; i < inst.length(); i++) {
             if ((inst[i] == ' ' && first_time) || (i == inst.length() - 1 && first_time)) {
                 inst_op = inst.substr(0, i);
                 if (i == inst.length() - 1)
                     inst_op = inst;
-                inst_load_store_vector.push_back(inst_op);
-                inst_arithmetic_vector.push_back(inst_op);
-                inst_branch_vector.push_back(inst_op);
-                inst_call_vector.push_back(inst_op);
-                inst_ret_vector.push_back(inst_op);
+                op = inst_op;
                 first_time = false;
                 continue;
             }
@@ -52,76 +43,92 @@ public:
                 if (inst[i] != ' ' && inst[i] != ',' && inst[i] != '(' && inst[i] != ')')
                     word += inst[i];
                 if (inst[i] == ',') {
-                    inst_load_store_vector.push_back(word); // dest
+                    if(inst_op == "LOAD")
+                    {
+                        dest = stoi(word.substr(1, word.length() - 1));
+                    }
+                    else
+                    {
+                        src1 = stoi(word.substr(1, word.length() - 1));
+                    }
                     word = "";
                 }
                 if (inst[i] == '(') {
-                    inst_load_store_vector.push_back(word); // imm
+                    imm = stoi(word);
                     word = "";
                     i++;
                     while (inst[i] != ')') {
                         word += inst[i];
                         i++;
                     }
-                    inst_load_store_vector.push_back(word); // src1
+                    if(inst_op == "LOAD")
+                    {
+                        dest = stoi(word.substr(1, word.length() - 1));
+                    }
+                    else
+                    {
+                        dest = stoi(word.substr(1, word.length() - 1));
+                    }
                     word = "";
                 }
             }
-            if (inst_op == "ADD" || inst_op == "MUL" || inst_op == "NAND" || inst_op == "ADDI") {
+            else if (inst_op == "ADD" || inst_op == "MUL" || inst_op == "NAND" || inst_op == "ADDI") {
                 if (inst[i] != ' ' && inst[i] != ',')
                     word += inst[i];
                 if (inst[i] == ',') {
-                    inst_arithmetic_vector.push_back(word); // dest or src1
+                    comma_count++;
+                    if (comma_count == 1) {
+                        dest = stoi(word.substr(1, word.length() - 1));
+                    }
+                    if (comma_count == 2) {
+                        src1 = stoi(word.substr(1, word.length() - 1));
+                    }
                     word = "";
                 }
                 if (i == inst.length() - 1) {
-                    inst_arithmetic_vector.push_back(word); // src2 or imm
+                    if (inst_op == "ADDI") {
+                        imm = stoi(word);
+                    } else {
+                        src2 = stoi(word.substr(1, word.length() - 1));
+                    }
                     word = "";
                 }
             }
-            if (inst_op == "BEQ") {
+            else if (inst_op == "BEQ") {
                 if (inst[i] != ' ' && inst[i] != ',')
                     word += inst[i];
                 if (inst[i] == ',') {
-                    inst_branch_vector.push_back(word); // src1
+                    if(comma_count == 0)
+                    {
+                        dest = stoi(word.substr(1, word.length() - 1));
+                    }
+                    else if(comma_count == 1)
+                    {
+                        src1 = stoi(word.substr(1, word.length() - 1));
+                    }
                     word = "";
                 }
                 if (i == inst.length() - 1) {
-                    inst_branch_vector.push_back(word); // src2
-                    word = "";
-                }
-                if (i == inst.length() - 1) {
-                    inst_branch_vector.push_back(word); // imm
+                    imm = stoi(word);
                     word = "";
                 }
             }
-            if (inst_op == "CALL") {
+            else if (inst_op == "CALL") {
                 if (inst[i] != ' ' && inst[i] != ',')
                     word += inst[i];
                 if (i == inst.length() - 1) {
-                    inst_call_vector.push_back(word); // imm
+                    imm = stoi(word);
                     word = "";
                 }
             }
+            else if (inst_op == "RET") {
+                // Do nothing
+            }
+            else
+            {
+                cout << "Invalid instruction" << endl;
+            }
         }
-        if (inst_op == "ADD" || inst_op == "MUL" || inst_op == "NAND" || inst_op == "ADDI") {
-            printVector(inst_arithmetic_vector);
-        } else if (inst_op == "LOAD" || inst_op == "STORE") {
-            printVector(inst_load_store_vector);
-        } else if (inst_op == "BEQ") {
-            printVector(inst_branch_vector);
-        } else if (inst_op == "CALL") {
-            printVector(inst_call_vector);
-        } else if (inst_op == "RET") {
-            printVector(inst_ret_vector);
-        } else {
-            cout << "Invalid instruction" << endl;
-        }
-        inst_load_store_vector.clear();
-        inst_arithmetic_vector.clear();
-        inst_branch_vector.clear();
-        inst_call_vector.clear();
-        inst_ret_vector.clear();
     }
 };
 
