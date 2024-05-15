@@ -21,18 +21,27 @@ vector<string> reading_from_file(string file_name)
     }
     return instructions;
 }
+class Tomasulo 
+{
+    public:
+        // instruction queue
+        vector<string> instructionQueue = reading_from_file("instructions.txt");
 
-void issue(Instruction instr)
-{
-    
-}
-void execute(Instruction instr)
-{
-    cout << "Executing instruction: " << instr.name << endl;
-}
-void write(Instruction instr)
-{
-    cout << "Writing instruction: " << instr.name << endl;
-}
+
+    private:
+    void issue(Instruction instr)
+    {
+        
+    }
+    void execute(Instruction instr)
+    {
+        cout << "Executing instruction: " << instr.name << endl;
+    }
+    void write(Instruction instr)
+    {
+        cout << "Writing instruction: " << instr.name << endl;
+    }
+};
+
 
 #endif

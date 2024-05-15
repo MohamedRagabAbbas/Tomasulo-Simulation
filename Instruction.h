@@ -30,7 +30,7 @@ public:
     int executionCycle_end;
     int writingCycle;
 
-    Instruction(int instructionId, const string& inst,int pc) : instructionId(instructionId), dest(-1), src1(-1), src2(-1), imm(-1), issuingCycle(pc), executionCycle_start(-1), executionCycle_end(-1), writingCycle(-1) {
+    Instruction(int instructionId, const string& inst) : instructionId(instructionId), dest(-1), src1(-1), src2(-1), imm(-1), issuingCycle(-1), executionCycle_start(-1), executionCycle_end(-1), writingCycle(-1) {
         string inst_op;
         string word;
         bool first_time = true;
@@ -134,6 +134,36 @@ public:
                 cout << "Invalid instruction" << endl;
             }
         }
+    }
+    void issuingCycle_set(int cycle)
+    {
+        issuingCycle = cycle;
+    }
+    void executionCycle_start_set(int cycle)
+    {
+        executionCycle_start = cycle;
+    }
+    void executionCycle_end_set(int cycle)
+    {
+        executionCycle_end = cycle;
+    }
+    void writingCycle_set(int cycle)
+    {
+        writingCycle = cycle;
+    }
+    void print()
+    {
+        cout << "Instruction ID: " << instructionId << endl;
+        cout << "Name: " << name << endl;
+        cout << "Operation: " << op << endl;
+        cout << "Destination: " << dest << endl;
+        cout << "Source 1: " << src1 << endl;
+        cout << "Source 2: " << src2 << endl;
+        cout << "Immediate: " << imm << endl;
+        cout << "Issuing Cycle: " << issuingCycle << endl;
+        cout << "Execution Cycle Start: " << executionCycle_start << endl;
+        cout << "Execution Cycle End: " << executionCycle_end << endl;
+        cout << "Writing Cycle: " << writingCycle << endl;
     }
 };
 
