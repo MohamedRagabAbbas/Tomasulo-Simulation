@@ -11,13 +11,7 @@ using namespace std;
 #define NReservationStations 12
 #define NRegisters 8
 int cycle = 0;
-
-void printVector(vector<string> v)
-{
-    for (int i = 0; i < v.size(); i++)
-        cout << v[i] << " ";
-    cout << endl;
-}
+// isntruction class
 class Instruction {
 public:
     int instructionId;
@@ -171,6 +165,7 @@ public:
     }
 };
 
+// reservation station 
 struct ReservationStation {
     int instructionId;
     string name;
@@ -183,10 +178,8 @@ struct ReservationStation {
     int A;
 };
 vector<ReservationStation> reservationStation;
-
 vector<string> opcodes = { "LOAD1","LOAD2", "STORE",  "BEQ",  "CALL/RET", "ADD/ADDI1",
                             "ADD/ADDI2","ADD/ADDI3","ADD/ADDI4", "NAND1", "NAND2", "MUL" };
-
 void fillingReservationStation()
 {
     for (int i = 0; i < NReservationStations; i++)
@@ -203,8 +196,8 @@ void fillingReservationStation()
     }
 }
 
+// filling mapper 
 map<string, vector<string>> mapper;
-
 void fillingMapper()
 {
     mapper["LOAD1"] = { "LOAD" };
@@ -231,6 +224,8 @@ enum instructionType {
     CALL,
     RET
 };
+
+// read instructions from file and fill the scheduleStation vector
 vector<string> instructions_str;
 void reading_from_file(const string& filename)
 {
@@ -257,6 +252,7 @@ void fillingInstructions()
     }
 }
 
+// filling register status
 struct RegisterStatus {
     string registerName;
     string q;
@@ -274,6 +270,8 @@ vector<RegisterStatus> fillingRegisterStatus()
     return registerStatus;
 }
 vector<RegisterStatus> registerStatus = fillingRegisterStatus();
+
+// print functions
 void printReservationStation()
 {
     cout << left; // Left-align the output
@@ -293,7 +291,6 @@ void printReservationStation()
             << setw(5) << reservationStation[i].A << endl;
     }
 }
-
 void printRegisterStatus()
 {
     cout << left; // Left-align the output
@@ -304,7 +301,6 @@ void printRegisterStatus()
         cout << setw(15) << registerStatus[i].registerName << setw(10) << registerStatus[i].q << endl;
     }
 }
-
 void printScheduleStation()
 {
     cout << left; // Left-align the output
@@ -320,6 +316,13 @@ void printScheduleStation()
             << setw(15) << scheduleStation[i].writingCycle << endl;
     }
 }
+void printVector(vector<string> v)
+{
+    for (int i = 0; i < v.size(); i++)
+        cout << v[i] << " ";
+    cout << endl;
+}
+
 
 void issue()
 {
@@ -354,5 +357,9 @@ void taskManager()
     // }
 }
 
-
+int main()
+{
+	taskManager();
+	return 0;
+}
 
