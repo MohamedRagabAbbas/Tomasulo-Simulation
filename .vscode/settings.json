@@ -1,5 +1,6 @@
 {
     "files.associations": {
+<<<<<<< HEAD
         "map": "cpp",
         "vector": "cpp",
         "xstring": "cpp",
@@ -55,5 +56,12 @@
         "xtr1common": "cpp",
         "xtree": "cpp",
         "xutility": "cpp"
+=======
+        "utility": "cpp",
+        "string": "cpp",
+        "iostream": "cpp",
+        "vector": "cpp",
+        "xstring": "cpp"
+>>>>>>> main
     }
 }
