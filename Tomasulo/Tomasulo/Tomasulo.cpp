@@ -390,7 +390,7 @@ void issue()
 						}
 						else
 						{
-							reservationStation[isBusy_var.first].qk = scheduleStation[i].src2; // set the reservation station of the source 2
+							reservationStation[isBusy_var.first].qk = get_reservation_station_id(registerStatus[scheduleStation[i].src2].q);; // set the reservation station of the source 2
 						}
 					}
 					if (scheduleStation[i].dest != -1) // if the destination is a register
