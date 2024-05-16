@@ -11,6 +11,8 @@ using namespace std;
 #define NReservationStations 12
 #define NRegisters 8
 int cycle = 0;
+bool isFinished = false;
+int writng_counter = 0;
 // isntruction class
 class Instruction {
 public:
@@ -179,6 +181,7 @@ public:
 
 // reservation station 
 struct ReservationStation {
+	int id;
     int instructionId;
     string name;
     bool busy;
@@ -197,6 +200,7 @@ void fillingReservationStation()
     for (int i = 0; i < NReservationStations; i++)
     {
         ReservationStation rs;
+		rs.id = i;
         rs.instructionId = -1;
         rs.name = opcodes[i];
         rs.busy = false;
@@ -286,12 +290,13 @@ vector<RegisterStatus> registerStatus = fillingRegisterStatus();
 void printReservationStation()
 {
     cout << left; // Left-align the output
-    cout << setw(15) << "Instruction ID" << setw(10) << "Name" << setw(5) << "Busy" << setw(10) << "Op"
+    cout << setw(5) << "Id" <<setw(15) << "Instruction ID" << setw(10) << "Name" << setw(5) << "Busy" << setw(10) << "Op"
         << setw(5) << "Vj" << setw(5) << "Vk" << setw(5) << "Qj" << setw(5) << "Qk" << setw(5) << "A" << endl;
 
     for (int i = 0; i < NReservationStations; i++)
     {
-        cout << setw(15) << reservationStation[i].instructionId
+		cout<< setw(5) << reservationStation[i].id
+            << setw(15) << reservationStation[i].instructionId
             << setw(10) << reservationStation[i].name
             << setw(5) << reservationStation[i].busy
             << setw(10) << reservationStation[i].op
@@ -342,6 +347,14 @@ void printVector(vector<string> v)
     cout << endl;
 }
 
+
+int get_reservation_station_id(string func)
+{
+	for (int i = 0; i < NReservationStations; i++)
+		if (reservationStation[i].name == func)
+			return i;
+	return -1;
+}
 pair<int, bool> isBusy(string func)
 {
     pair<int, bool> isBusy_var;
@@ -373,7 +386,7 @@ void issue()
 						}
 						else
 						{
-							reservationStation[isBusy_var.first].qj = scheduleStation[i].src1; // set the reservation station of the source 1
+							reservationStation[isBusy_var.first].qj = get_reservation_station_id(registerStatus[scheduleStation[i].src1].q); // set the reservation station of the source 1
 						}
 					}
 					if (scheduleStation[i].src2 != -1) // if the source 2 is a register
@@ -402,6 +415,13 @@ void issue()
 	}
 }
 
+int get_instruction_index(int instructionId)
+{
+	for (int i = 0; i < scheduleStation.size(); i++)
+		if (scheduleStation[i].instructionId == instructionId)
+			return i;
+	return -1;
+}
 void execute()
 {
 	for (int i = 0; i < NReservationStations; i++)
@@ -428,67 +448,107 @@ void writeResult()
 		{
 			if (scheduleStation[reservationStation[i].instructionId].executionCycle_end + 1  == cycle) // if the instruction is executed
 			{
-				scheduleStation[reservationStation[i].instructionId].writingCycle_set(cycle);
-				reservationStation[i].busy = false;
-				//if (reservationStation[i].qj != -1) // if the source 1 is a reservation station
-				//{
-				//	for (int j = 0; j < NReservationStations; j++)
-				//	{
-				//		if (reservationStation[j].name == registerStatus[reservationStation[i].qj].q)
-				//		{
-				//			reservationStation[j].qj = -1;
-				//			if (reservationStation[j].qk == -1)
-				//			{
-				//				reservationStation[j].vj = registerStatus[reservationStation[i].qj].q;
-				//			}
-				//		}
-				//	}
-				//}
-				//if (reservationStation[i].qk != -1) // if the source 2 is a reservation station
-				//{
-				//	for (int j = 0; j < NReservationStations; j++)
-				//	{
-				//		if (reservationStation[j].name == registerStatus[reservationStation[i].qk].q)
-				//		{
-				//			reservationStation[j].qk = -1;
-				//			if (reservationStation[j].qj == -1)
-				//			{
-				//				reservationStation[j].vk = registerStatus[reservationStation[i].qk].q;
-				//			}
-				//		}
-				//	}
-				//}
-				if (reservationStation[i].qj == -1) // if the source 1 is a register
-				{
-					registerStatus[reservationStation[i].vj].q = "";
-				}
-				if (reservationStation[i].qk == -1) // if the source 2 is a register
-				{
-					registerStatus[reservationStation[i].vk].q = "";
-				}
-				if (reservationStation[i].op != "LOAD" && reservationStation[i].op != "STORE") // if the operation is not load or store
-				{
-					registerStatus[reservationStation[i].instructionId].q = "";
-				}
+				int instruction_index = get_instruction_index(reservationStation[i].instructionId);
+                if (instruction_index != -1)
+                {
+                    scheduleStation[instruction_index].writingCycle_set(cycle);
+                    writng_counter++;
+                    reservationStation[i].busy = false;
+                    reservationStation[i].op = "";
+                    reservationStation[i].vj = -1;
+                    reservationStation[i].vk = -1;
+                    reservationStation[i].qj = -1;
+                    reservationStation[i].qk = -1;
+                    reservationStation[i].A = -1;
+                    // update the register status
+                    for (int j = 0; j < NRegisters; j++)
+                    {
+                        if (registerStatus[j].q == reservationStation[i].name)
+                        {
+                            registerStatus[j].q = "";
+                        }
+                    }
+                    // update the reservation stations
+                    for (int j = 0; j < NReservationStations; j++)
+                    {
+                        if (reservationStation[j].qj == reservationStation[i].id)
+                        {
+                            reservationStation[j].qj = -1;
+                            // update vj
+                            for (int k = 0; k < scheduleStation.size(); k++)
+                            {
+                                if (scheduleStation[k].instructionId == reservationStation[j].instructionId)
+                                {
+                                    reservationStation[j].vj = scheduleStation[k].src1;
+                                    break;
+                                }
+                            }
+                        }
+                        if (reservationStation[j].qk == reservationStation[i].id)
+                        {
+                            reservationStation[j].qk = -1;
+                            // update vk
+                            for (int k = 0; k < scheduleStation.size(); k++)
+                            {
+                                if (scheduleStation[k].instructionId == reservationStation[j].instructionId)
+                                {
+                                    reservationStation[j].vk = scheduleStation[k].src2;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                }
+				
 			}
 		}
 	}
 }
 
-
+void runOneStep()
+{
+	issue();
+	execute();
+	writeResult();
+	cycle++;
+}
 void taskManager()
 {
     reading_from_file("instructions.txt");
     fillingInstructions();
     fillingReservationStation();
     fillingMapper();
-	issue();
-	cycle++;
-    issue();
-
-
-
-
+    runOneStep();
+    runOneStep();
+    runOneStep();
+    runOneStep();
+    runOneStep();
+    runOneStep();
+    runOneStep();
+    runOneStep();
+    runOneStep();
+    runOneStep();
+    runOneStep();
+    runOneStep();
+    runOneStep();
+    runOneStep();
+    runOneStep();
+    runOneStep();
+    runOneStep();
+    runOneStep();
+    runOneStep();
+    runOneStep();
+    runOneStep();
+  
+	/*while (writng_counter != scheduleStation.size())
+	{
+		issue();
+		execute();
+		writeResult();
+		cycle++;
+	}*/
+	cout << "---------------------------------------------" << endl;
     printScheduleStation();
 	cout << "---------------------------------------------" << endl;
 	printReservationStation();

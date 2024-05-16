@@ -5,6 +5,9 @@
     {
       "AbsoluteMoniker": "D:0:0:{E42E3699-1322-4B94-9E39-076C30DA44F1}|Tomasulo\\Tomasulo.vcxproj|D:\\Projects\\Tomasulo-Simulation\\Tomasulo\\Tomasulo\\Tomasulo.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{E42E3699-1322-4B94-9E39-076C30DA44F1}|Tomasulo\\Tomasulo.vcxproj|solutionrelative:Tomasulo\\Tomasulo.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E42E3699-1322-4B94-9E39-076C30DA44F1}|Tomasulo\\Tomasulo.vcxproj|C:\\PROGRAM FILES\\MICROSOFT VISUAL STUDIO\\2022\\COMMUNITY\\VC\\TOOLS\\MSVC\\14.39.33519\\INCLUDE\\VECTOR||{3B902123-F8A7-4915-9F01-361F908088D0}|"
     }
   ],
   "DocumentGroupContainers": [
@@ -14,17 +17,28 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": 1,
           "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "vector",
+              "DocumentMoniker": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.39.33519\\include\\vector",
+              "ToolTip": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.39.33519\\include\\vector",
+              "ViewState": "AQIAAFwHAAAAAAAAAAAqwGQHAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2024-05-16T02:23:33.231Z",
+              "EditorCaption": ""
+            },
             {
               "$type": "Document",
               "DocumentIndex": 0,
               "Title": "Tomasulo.cpp",
               "DocumentMoniker": "D:\\Projects\\Tomasulo-Simulation\\Tomasulo\\Tomasulo\\Tomasulo.cpp",
               "RelativeDocumentMoniker": "Tomasulo\\Tomasulo.cpp",
-              "ToolTip": "D:\\Projects\\Tomasulo-Simulation\\Tomasulo\\Tomasulo\\Tomasulo.cpp",
-              "RelativeToolTip": "Tomasulo\\Tomasulo.cpp",
-              "ViewState": "AQIAACcBAAAAAAAAAAAiwDkBAAATAAAA",
+              "ToolTip": "D:\\Projects\\Tomasulo-Simulation\\Tomasulo\\Tomasulo\\Tomasulo.cpp*",
+              "RelativeToolTip": "Tomasulo\\Tomasulo.cpp*",
+              "ViewState": "AQIAABYCAAAAAAAAAAAAABsCAAAiAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2024-05-15T23:47:03.295Z",
               "EditorCaption": ""
