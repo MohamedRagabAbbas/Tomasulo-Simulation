@@ -1,0 +1,10 @@
+ADDI r2, r0, 2
+CALL 6
+ADD r2, r2, r2
+ADDI r2, r0, 10
+ADD r2, r2, r2
+MUL r2, r2, r2
+NAND r2, r2, r2
+ADDI r2, r2, 3
+NAND r2, r2
+RET

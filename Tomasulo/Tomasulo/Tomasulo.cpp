@@ -315,7 +315,7 @@ void printRegisterStatus()
 {
     cout << left; // Left-align the output
     for (int i = 0; i < NRegisters; i++) {
-        registerStatus[i].registerName = "Reg" + to_string(i + 1);
+        registerStatus[i].registerName = "Reg" + to_string(i);
     }
     cout << setw(20) << "Register Name" << setw(20) << "Q" << endl;
     for (int i = 0; i < NRegisters; i++) {
@@ -435,7 +435,8 @@ void execute()
 	{
 		if (reservationStation[i].busy)
 		{
-			if (scheduleStation[reservationStation[i].instructionId].executionCycle_start == -1) // if the instruction is not executed yet
+			// if the instruction is not executed yet or the pogram jumped 
+			if (scheduleStation[reservationStation[i].instructionId].executionCycle_start == -1 || isJump) 
 			{
                 if (reservationStation[i].qj == -1 && reservationStation[i].qk == -1) // if the sources are ready
                 {
@@ -458,8 +459,9 @@ void writeResult()
 				int instruction_index = get_instruction_index(reservationStation[i].instructionId);
                 if (instruction_index != -1)
                 {
+					if (scheduleStation[instruction_index].writingCycle == -1) // only update the writing cycle once
+                        writng_counter++;
                     scheduleStation[instruction_index].writingCycle_set(cycle);
-                    writng_counter++;
                     reservationStation[i].busy = false;
                     reservationStation[i].op = "";
                     reservationStation[i].vj = -1;
@@ -548,7 +550,7 @@ void print()
 }
 void taskManager()
 {
-    reading_from_file("instructions.txt");
+    reading_from_file("instructions3.txt");
     fillingInstructions();
     fillingReservationStation();
     fillingMapper();
