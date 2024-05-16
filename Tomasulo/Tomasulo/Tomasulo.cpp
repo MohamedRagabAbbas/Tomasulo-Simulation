@@ -142,8 +142,8 @@ public:
                     word = "";
                 }
             }
-            else if (inst_op == "RET") {
-                // Do nothing
+            else if (inst == "RET") {
+                op = inst_op;
             }
             else
             {
@@ -561,6 +561,7 @@ void taskManager()
         execute(); 
         writeResult();
         cycle++;
+        print();
     }
     printScheduleStation();
    /* runOneStep();
