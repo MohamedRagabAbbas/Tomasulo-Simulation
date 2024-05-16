@@ -472,7 +472,8 @@ void writeResult()
 					// if it is call set R[1] to the return address which is the next instruction ctyle + 1
 					if (scheduleStation[instruction_index].op == "CALL")
 					{
-						R[1] = cycle + 1;
+						R[1] = cycle -1;
+                       // R[1] = cycle - numberOfcycles["CALL"] ;
 						bool isJump = true;
 						jumpTo = scheduleStation[instruction_index].imm;
 						PC = jumpTo;
@@ -481,6 +482,7 @@ void writeResult()
                     if (scheduleStation[instruction_index].op == "RET")
                     {
                         PC = R[1];
+						R[1] = -1;
                     }
                     // update the reservation stations
                     for (int j = 0; j < NReservationStations; j++)
