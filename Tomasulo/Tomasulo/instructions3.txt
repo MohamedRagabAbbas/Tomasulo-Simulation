@@ -1,8 +1,9 @@
 ADDI r2, r0, 2
 CALL 6
-ADD r2, r2, r2
+ADD r3, r2, r2
+ADDI r5, r3, 3
 ADDI r2, r0, 10
-ADD r2, r2, r2
+ADD r1, r2, r2
 MUL r7, r2, r2
 NAND r6, r1, r1
 ADDI r5, r3, 3
