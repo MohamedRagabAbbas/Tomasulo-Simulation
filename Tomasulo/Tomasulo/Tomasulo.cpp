@@ -201,9 +201,9 @@ void fillingReservationStation()
         rs.name = opcodes[i];
         rs.busy = false;
         rs.op = "";
-        rs.vj = 0; rs.vk = 0;
-        rs.qj = 0; rs.qk = 0;
-        rs.A = 0;
+        rs.vj = -1; rs.vk = -1;
+        rs.qj = -1; rs.qk = -1;
+        rs.A = -1;
         reservationStation.push_back(rs);
     }
 }
@@ -308,13 +308,13 @@ void printRegisterStatus()
     }
     cout << setw(20) << "Register Name";
     for (int i = 0; i < NRegisters; i++) {
-        cout << setw(10)<< registerStatus[i].registerName;
+        cout << setw(15)<< registerStatus[i].registerName;
     }
 	cout << endl;
-    cout << setw(20) << "Q";
+    cout << setw(15) << "Q";
     for (int i = 0; i < NRegisters; i++)
     {
-        cout<< registerStatus[i].q<< setw(5);
+        cout<< registerStatus[i].q<< setw(20);
     }
     cout << endl;
 }
@@ -363,6 +363,32 @@ void issue()
 					reservationStation[isBusy_var.first].instructionId = scheduleStation[i].instructionId; // set the instruction id
 					reservationStation[isBusy_var.first].busy = true; // set the reservation station to busy
 					reservationStation[isBusy_var.first].op = scheduleStation[i].op; // set the operation
+					if (scheduleStation[i].src1 != -1) // if the source 1 is a register
+					{
+						if (registerStatus[scheduleStation[i].src1].q == "") // if the register is not busy
+						{
+							reservationStation[isBusy_var.first].vj = scheduleStation[i].src1; // set the value of the source 1
+						}
+						else
+						{
+							reservationStation[isBusy_var.first].qj = scheduleStation[i].src1; // set the reservation station of the source 1
+						}
+					}
+					if (scheduleStation[i].src2 != -1) // if the source 2 is a register
+					{
+						if (registerStatus[scheduleStation[i].src2].q == "") // if the register is not busy
+						{
+							reservationStation[isBusy_var.first].vk = scheduleStation[i].src2; // set the value of the source 2
+						}
+						else
+						{
+							reservationStation[isBusy_var.first].qk = scheduleStation[i].src2; // set the reservation station of the source 2
+						}
+					}
+					if (scheduleStation[i].dest != -1) // if the destination is a register
+					{
+						registerStatus[scheduleStation[i].dest].q = reservationStation[isBusy_var.first].name; // set the reservation station of the destination
+					}
 					return;
 				}
 			}
@@ -386,6 +412,10 @@ void taskManager()
     fillingReservationStation();
     fillingMapper();
 	issue();
+	cycle++;
+    issue();
+
+
 
 
     printScheduleStation();
