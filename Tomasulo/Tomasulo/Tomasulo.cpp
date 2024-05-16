@@ -416,15 +416,65 @@ void execute()
                     scheduleStation[reservationStation[i].instructionId].executionCycle_end_set(cycle + numberOfcycles[reservationStation[i].op]);
                 }
 			}
-			
 		}
 	}
 }
 
-void write()
+void writeResult()
 {
-
+	for (int i = 0; i < NReservationStations; i++)
+	{
+		if (reservationStation[i].busy)
+		{
+			if (scheduleStation[reservationStation[i].instructionId].executionCycle_end + 1  == cycle) // if the instruction is executed
+			{
+				scheduleStation[reservationStation[i].instructionId].writingCycle_set(cycle);
+				reservationStation[i].busy = false;
+				//if (reservationStation[i].qj != -1) // if the source 1 is a reservation station
+				//{
+				//	for (int j = 0; j < NReservationStations; j++)
+				//	{
+				//		if (reservationStation[j].name == registerStatus[reservationStation[i].qj].q)
+				//		{
+				//			reservationStation[j].qj = -1;
+				//			if (reservationStation[j].qk == -1)
+				//			{
+				//				reservationStation[j].vj = registerStatus[reservationStation[i].qj].q;
+				//			}
+				//		}
+				//	}
+				//}
+				//if (reservationStation[i].qk != -1) // if the source 2 is a reservation station
+				//{
+				//	for (int j = 0; j < NReservationStations; j++)
+				//	{
+				//		if (reservationStation[j].name == registerStatus[reservationStation[i].qk].q)
+				//		{
+				//			reservationStation[j].qk = -1;
+				//			if (reservationStation[j].qj == -1)
+				//			{
+				//				reservationStation[j].vk = registerStatus[reservationStation[i].qk].q;
+				//			}
+				//		}
+				//	}
+				//}
+				if (reservationStation[i].qj == -1) // if the source 1 is a register
+				{
+					registerStatus[reservationStation[i].vj].q = "";
+				}
+				if (reservationStation[i].qk == -1) // if the source 2 is a register
+				{
+					registerStatus[reservationStation[i].vk].q = "";
+				}
+				if (reservationStation[i].op != "LOAD" && reservationStation[i].op != "STORE") // if the operation is not load or store
+				{
+					registerStatus[reservationStation[i].instructionId].q = "";
+				}
+			}
+		}
+	}
 }
+
 
 void taskManager()
 {
