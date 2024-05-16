@@ -313,17 +313,10 @@ void printRegisterStatus()
     for (int i = 0; i < NRegisters; i++) {
         registerStatus[i].registerName = "Reg" + to_string(i + 1);
     }
-    cout << setw(20) << "Register Name";
+    cout << setw(20) << "Register Name" << setw(20) << "Q" << endl;
     for (int i = 0; i < NRegisters; i++) {
-        cout << setw(15)<< registerStatus[i].registerName;
+		cout << setw(20) << registerStatus[i].registerName << setw(20) << registerStatus[i].q << endl;
     }
-	cout << endl;
-    cout << setw(15) << "Q";
-    for (int i = 0; i < NRegisters; i++)
-    {
-        cout<< registerStatus[i].q<< setw(20);
-    }
-    cout << endl;
 }
 void printScheduleStation()
 {
@@ -460,13 +453,10 @@ void writeResult()
                     reservationStation[i].qj = -1;
                     reservationStation[i].qk = -1;
                     reservationStation[i].A = -1;
-                    // update the register status
-                    for (int j = 0; j < NRegisters; j++)
+
+                    if (cycle == 5)
                     {
-                        if (registerStatus[j].q == reservationStation[i].name)
-                        {
-                            registerStatus[j].q = "";
-                        }
+						int x = 0;
                     }
                     // update the reservation stations
                     for (int j = 0; j < NReservationStations; j++)
@@ -499,6 +489,16 @@ void writeResult()
                         }
                     }
 
+                    // update the register status
+                    for (int j = 0; j < NRegisters; j++)
+                    {
+                        if (registerStatus[j].q == reservationStation[i].name)
+                        {
+                            registerStatus[j].q = "";
+                        }
+                    }
+                    
+
                 }
 				
 			}
@@ -513,6 +513,17 @@ void runOneStep()
 	writeResult();
 	cycle++;
 }
+void print()
+{
+	cout << "------------------------------"<< "Cycle: " << cycle-1<<"------------------------------" << endl;
+	cout << "---------------------------------------------" << endl;
+	printScheduleStation();
+    cout << "---------------------------------------------" << endl;
+	printReservationStation();
+    cout << "---------------------------------------------" << endl;
+	printRegisterStatus();
+    cout << "---------------------------------------------" << endl;
+}
 void taskManager()
 {
     reading_from_file("instructions.txt");
@@ -520,25 +531,45 @@ void taskManager()
     fillingReservationStation();
     fillingMapper();
     runOneStep();
+    print();
     runOneStep();
+    print();
     runOneStep();
+    print();
     runOneStep();
+    print();
     runOneStep();
+    print();
     runOneStep();
+    print();
     runOneStep();
+    print();
     runOneStep();
+    print();
     runOneStep();
+    print();
     runOneStep();
+    print();
     runOneStep();
+    print();
     runOneStep();
+    print();
     runOneStep();
+    print();
     runOneStep();
+    print();
     runOneStep();
+    print();
     runOneStep();
+    print();
     runOneStep();
+    print();
     runOneStep();
+    print();
     runOneStep();
+    print();
     runOneStep();
+    print();
     runOneStep();
   
 	/*while (writng_counter != scheduleStation.size())
@@ -548,12 +579,7 @@ void taskManager()
 		writeResult();
 		cycle++;
 	}*/
-	cout << "---------------------------------------------" << endl;
-    printScheduleStation();
-	cout << "---------------------------------------------" << endl;
-	printReservationStation();
-    cout << "---------------------------------------------" << endl;
-	printRegisterStatus();
+	
 }
 
 int main()

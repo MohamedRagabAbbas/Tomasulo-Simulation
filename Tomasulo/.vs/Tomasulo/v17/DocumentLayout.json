@@ -17,8 +17,21 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 1,
+          "SelectedChildIndex": 0,
           "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Tomasulo.cpp",
+              "DocumentMoniker": "D:\\Projects\\Tomasulo-Simulation\\Tomasulo\\Tomasulo\\Tomasulo.cpp",
+              "RelativeDocumentMoniker": "Tomasulo\\Tomasulo.cpp",
+              "ToolTip": "D:\\Projects\\Tomasulo-Simulation\\Tomasulo\\Tomasulo\\Tomasulo.cpp*",
+              "RelativeToolTip": "Tomasulo\\Tomasulo.cpp*",
+              "ViewState": "AQIAAMABAAAAAAAAAAAWwM0BAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2024-05-15T23:47:03.295Z",
+              "EditorCaption": ""
+            },
             {
               "$type": "Document",
               "DocumentIndex": 1,
@@ -28,19 +41,6 @@
               "ViewState": "AQIAAFwHAAAAAAAAAAAqwGQHAAAAAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
               "WhenOpened": "2024-05-16T02:23:33.231Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "Tomasulo.cpp",
-              "DocumentMoniker": "D:\\Projects\\Tomasulo-Simulation\\Tomasulo\\Tomasulo\\Tomasulo.cpp",
-              "RelativeDocumentMoniker": "Tomasulo\\Tomasulo.cpp",
-              "ToolTip": "D:\\Projects\\Tomasulo-Simulation\\Tomasulo\\Tomasulo\\Tomasulo.cpp*",
-              "RelativeToolTip": "Tomasulo\\Tomasulo.cpp*",
-              "ViewState": "AQIAABYCAAAAAAAAAAAAABsCAAAiAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2024-05-15T23:47:03.295Z",
               "EditorCaption": ""
             }
           ]
