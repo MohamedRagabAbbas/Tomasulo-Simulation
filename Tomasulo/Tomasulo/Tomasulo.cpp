@@ -222,6 +222,8 @@ void fillingMapper()
     mapper["NAND"] = { "NAND1","NAND2"};
     mapper["MUL"] = { "MUL" };
 }
+map<string, int> numberOfcycles = { {"LOAD", 6}, {"STORE", 6}, {"BEQ", 1}, {"CALL/RET", 1}, {"ADD", 2},
+									{"ADDI", 2}, {"NAND", 2}, {"MUL", 10} };
 
 enum instructionType {
     LOAD,
@@ -398,8 +400,19 @@ void issue()
 
 void execute()
 {
-
+	for (int i = 0; i < NReservationStations; i++)
+	{
+		if (reservationStation[i].busy)
+		{
+			if (reservationStation[i].qj == -1 && reservationStation[i].qk == -1) // if the sources are ready
+			{
+				scheduleStation[reservationStation[i].instructionId].executionCycle_start_set(cycle);
+				scheduleStation[reservationStation[i].instructionId].executionCycle_end_set(cycle + numberOfcycles[reservationStation[i].op]);
+			}
+		}
+	}
 }
+
 void write()
 {
 
