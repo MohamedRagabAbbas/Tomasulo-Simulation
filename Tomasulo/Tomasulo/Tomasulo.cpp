@@ -14,10 +14,13 @@ int PC = 0; // program counter
 vector<int>R(NRegisters, -1);
 int jumpTo = 0; // the instruction to jump to
 bool isJump = false; // if the program is jumping
-bool numberOfJumps = 0; // number of jumps
+int numberOfJumps = 0; // number of jumps
 int cycle = 0;
 bool isFinished = false;
 int writng_counter = 0;
+
+
+
 // isntruction class
 class Instruction {
 public:
@@ -345,6 +348,22 @@ void printVector(vector<string> v)
     cout << endl;
 }
 
+// take image form the reservatioin station and status register and wait for know whether the branch is taken or not
+vector<ReservationStation> reservationStation_image;
+vector<RegisterStatus> registerStatus_image;
+void takeImage()
+{
+    reservationStation_image = reservationStation;
+    registerStatus_image = registerStatus;
+}
+// restore the reservation station and status register
+void restoreImage()
+{
+    reservationStation = reservationStation_image;
+    registerStatus = registerStatus_image;
+}
+
+
 
 int get_reservation_station_id(string func)
 {
@@ -414,6 +433,11 @@ void issue()
                         {
                             reservationStation[isBusy_var.first].A = scheduleStation[i].imm;
                         }
+       //                 if (scheduleStation[i].op == "CALL")
+       //                 {
+       //                     // take image
+							//takeImage();
+       //                 }
                         return;
                     }
              //   }
@@ -431,20 +455,51 @@ int get_instruction_index(int instructionId)
 	return -1;
 }
 int pointer = 0;
-map<int, map<int, bool>> isExecuted_in_functionsStack;
+//2d vector to store the instructions that are executed in the functions stack
+vector<vector<bool>> isExecuted_in_functionsStack;
+void filling_isExecuted_in_functionsStack()
+{
+	for (int i = 0; i < scheduleStation.size(); i++)
+	{
+		vector<bool> v;
+		for (int j = 0; j < scheduleStation.size(); j++)
+		{
+			v.push_back(false);
+		}
+		isExecuted_in_functionsStack.push_back(v);
+	}
+}
+
+
+// check if the branch is taken or not
+bool isBranchTaken(int instructionId)
+{
+	int instruction_index = get_instruction_index(instructionId);
+	if (scheduleStation[instruction_index].op == "BEQ")
+	{
+		if (R[scheduleStation[instruction_index].src1] == R[scheduleStation[instruction_index].src2])
+		{
+			return true;
+		}
+	}
+	return false;
+}
 void execute()
 {
-	for (int i = pointer; i < NReservationStations; i++)
+	for (int i = 0; i < NReservationStations; i++)
 	{
 		if (reservationStation[i].busy)
 		{
 			// if the instruction is not executed yet or the pogram jumped 
-			if (scheduleStation[reservationStation[i].instructionId].executionCycle_start == -1 || isJump) 
+			if (
+                isExecuted_in_functionsStack[numberOfJumps][reservationStation[i].instructionId] == false &&
+                scheduleStation[reservationStation[i].instructionId].issuingCycle !=cycle)
 			{
                 if (reservationStation[i].qj == -1 && reservationStation[i].qk == -1) // if the sources are ready
                 {
                     scheduleStation[reservationStation[i].instructionId].executionCycle_start_set(cycle);
-                    scheduleStation[reservationStation[i].instructionId].executionCycle_end_set(cycle + numberOfcycles[reservationStation[i].op]);
+                    scheduleStation[reservationStation[i].instructionId].executionCycle_end_set(cycle + numberOfcycles[reservationStation[i].op]-1);
+					isExecuted_in_functionsStack[numberOfJumps][reservationStation[i].instructionId] = true;
 					//map<int, bool> isExecuted = isExecuted_in_functionsStack[reservationStation[i].instructionId];
                 }
                 if (isJump)
@@ -456,14 +511,49 @@ void execute()
 		}
 	}
 }
+//flush the two instructions after the call
+void flush(int call_id)
+{
+	for (int i = call_id; i < call_id + 2; i++)
+	{
+		scheduleStation[i].issuingCycle_set(-1);
+		scheduleStation[i].executionCycle_start_set(-1);
+		scheduleStation[i].executionCycle_end_set(-1);
+		scheduleStation[i].writingCycle_set(-1);
+        registerStatus[scheduleStation[i].dest].q = "";
+		for (int j = 0; j < NReservationStations; j++)
+		{
+			if (reservationStation[j].instructionId == scheduleStation[i].instructionId)
+			{
+				reservationStation[j].busy = false;
+				reservationStation[j].op = "";
+				reservationStation[j].vj = -1;
+				reservationStation[j].vk = -1;
+				reservationStation[j].qj = -1;
+				reservationStation[j].qk = -1;
+				reservationStation[j].A = -1;
+			}
+		}
+	}
+
+}
 
 void writeResult()
 {
+    // if call.write == cycle + 2 flush the two instructions after the call
+    for (int b = 0; b < scheduleStation.size(); b++)
+    {
+        if (scheduleStation[b].op == "CALL" && scheduleStation[b].writingCycle != -1 && scheduleStation[b].writingCycle + 1 == cycle )
+        {
+            flush(b+1);
+        }
+    }
 	for (int i = 0; i < NReservationStations; i++)
 	{
 		if (reservationStation[i].busy)
 		{
-			if (scheduleStation[reservationStation[i].instructionId].executionCycle_end + 1  == cycle) // if the instruction is executed
+			if (scheduleStation[reservationStation[i].instructionId].executionCycle_end + 1  == cycle 
+                && scheduleStation[reservationStation[i].instructionId].executionCycle_end!= -1) // if the instruction is executed
 			{
 				int instruction_index = get_instruction_index(reservationStation[i].instructionId);
                 if (instruction_index != -1)
@@ -486,12 +576,19 @@ void writeResult()
 					    isJump = true;
 						jumpTo = scheduleStation[instruction_index].imm;
 						PC = jumpTo;
+                        for (int l = 0; l <= instruction_index; l++)
+                        {
+							isExecuted_in_functionsStack[numberOfJumps+1][l] = true;
+                        }
+
 					}
 					// if it is ret set the cycle to the return address
                     if (scheduleStation[instruction_index].op == "RET")
                     {
                         PC = R[1];
 						R[1] = -1;
+                        numberOfJumps++;
+                        // flush the two instructions after the call
                     }
                     // update the reservation stations
                     for (int j = 0; j < NReservationStations; j++)
@@ -539,6 +636,7 @@ void writeResult()
 			}
 		}
 	}
+
 }
 
 void runOneStep()
@@ -565,6 +663,7 @@ void taskManager()
     fillingInstructions();
     fillingReservationStation();
     fillingMapper();
+	filling_isExecuted_in_functionsStack();
 
     while (writng_counter != scheduleStation.size())
     {
