@@ -10,6 +10,10 @@ using namespace std;
 
 #define NReservationStations 12
 #define NRegisters 8
+int PC = 0; // program counter
+vector<int>R(NRegisters, -1);
+int jumpTo = 0; // the instruction to jump to
+bool isJump = false; // if the program is jumping
 int cycle = 0;
 bool isFinished = false;
 int writng_counter = 0;
@@ -358,53 +362,63 @@ pair<int, bool> isBusy(string func)
 }
 void issue()
 {
-	for (int i = 0; i < scheduleStation.size(); i++)
-	{
-		if (scheduleStation[i].issuingCycle == -1) // means not issued yet
-		{
-			for (int j = 0; j < mapper[scheduleStation[i].op].size(); j++)
-			{
-				pair<int, bool> isBusy_var = isBusy(mapper[scheduleStation[i].op][j]);
-				if (!isBusy_var.second) // if the reservation station is not busy
-				{
-					scheduleStation[i].issuingCycle_set(cycle); // set the issuing cycle
-					reservationStation[isBusy_var.first].instructionId = scheduleStation[i].instructionId; // set the instruction id
-					reservationStation[isBusy_var.first].busy = true; // set the reservation station to busy
-					reservationStation[isBusy_var.first].op = scheduleStation[i].op; // set the operation
-					if (scheduleStation[i].src1 != -1) // if the source 1 is a register
-					{
-						if (registerStatus[scheduleStation[i].src1].q == "") // if the register is not busy
-						{
-							reservationStation[isBusy_var.first].vj = scheduleStation[i].src1; // set the value of the source 1
-						}
-						else
-						{
-							reservationStation[isBusy_var.first].qj = get_reservation_station_id(registerStatus[scheduleStation[i].src1].q); // set the reservation station of the source 1
-						}
-					}
-					if (scheduleStation[i].src2 != -1) // if the source 2 is a register
-					{
-						if (registerStatus[scheduleStation[i].src2].q == "") // if the register is not busy
-						{
-							reservationStation[isBusy_var.first].vk = scheduleStation[i].src2; // set the value of the source 2
-						}
-						else
-						{
-							reservationStation[isBusy_var.first].qk = get_reservation_station_id(registerStatus[scheduleStation[i].src2].q);; // set the reservation station of the source 2
-						}
-					}
-					if (scheduleStation[i].dest != -1) // if the destination is a register
-					{
-						registerStatus[scheduleStation[i].dest].q = reservationStation[isBusy_var.first].name; // set the reservation station of the destination
-					}
-					if (scheduleStation[i].op == "LOAD" || scheduleStation[i].op == "STORE") // if the operation is load or store
-					{
-						reservationStation[isBusy_var.first].A = scheduleStation[i].imm;
-					}
-					return;
-				}
-			}
-		}
+	//for (int i = PC; i < scheduleStation.size(); i++)
+	//{
+	//	if (R[1] == -1) // means the return address is set
+ //       {
+            if (PC >= scheduleStation.size())
+	        {
+		        return;
+	        }
+	        int i = PC;
+            //if (scheduleStation[i].issuingCycle == -1) // means not issued yet
+            //{
+                for (int j = 0; j < mapper[scheduleStation[i].op].size(); j++)
+                {
+                    pair<int, bool> isBusy_var = isBusy(mapper[scheduleStation[i].op][j]);
+                    if (!isBusy_var.second) // if the reservation station is not busy
+                    {
+                        scheduleStation[i].issuingCycle_set(cycle); // set the issuing cycle
+                        PC++;
+                        reservationStation[isBusy_var.first].instructionId = scheduleStation[i].instructionId; // set the instruction id
+                        reservationStation[isBusy_var.first].busy = true; // set the reservation station to busy
+                        reservationStation[isBusy_var.first].op = scheduleStation[i].op; // set the operation
+                        if (scheduleStation[i].src1 != -1) // if the source 1 is a register
+                        {
+                            if (registerStatus[scheduleStation[i].src1].q == "") // if the register is not busy
+                            {
+                                reservationStation[isBusy_var.first].vj = scheduleStation[i].src1; // set the value of the source 1
+                            }
+                            else
+                            {
+                                reservationStation[isBusy_var.first].qj = get_reservation_station_id(registerStatus[scheduleStation[i].src1].q); // set the reservation station of the source 1
+                            }
+                        }
+                        if (scheduleStation[i].src2 != -1) // if the source 2 is a register
+                        {
+                            if (registerStatus[scheduleStation[i].src2].q == "") // if the register is not busy
+                            {
+                                reservationStation[isBusy_var.first].vk = scheduleStation[i].src2; // set the value of the source 2
+                            }
+                            else
+                            {
+                                reservationStation[isBusy_var.first].qk = get_reservation_station_id(registerStatus[scheduleStation[i].src2].q);; // set the reservation station of the source 2
+                            }
+                        }
+                        if (scheduleStation[i].dest != -1) // if the destination is a register
+                        {
+                            registerStatus[scheduleStation[i].dest].q = reservationStation[isBusy_var.first].name; // set the reservation station of the destination
+                        }
+                        if (scheduleStation[i].op == "LOAD" || scheduleStation[i].op == "STORE") // if the operation is load or store
+                        {
+                            reservationStation[isBusy_var.first].A = scheduleStation[i].imm;
+                        }
+                        return;
+                    }
+             //   }
+        //    }
+        //}
+		
 	}
 }
 
@@ -453,10 +467,18 @@ void writeResult()
                     reservationStation[i].qj = -1;
                     reservationStation[i].qk = -1;
                     reservationStation[i].A = -1;
-
-                    if (cycle == 5)
+					// if it is call set R[1] to the return address which is the next instruction ctyle + 1
+					if (scheduleStation[instruction_index].op == "CALL")
+					{
+						R[1] = cycle + 1;
+						bool isJump = true;
+						jumpTo = scheduleStation[instruction_index].imm;
+						PC = jumpTo;
+					}
+					// if it is ret set the cycle to the return address
+                    if (scheduleStation[instruction_index].op == "RET")
                     {
-						int x = 0;
+                        PC = R[1];
                     }
                     // update the reservation stations
                     for (int j = 0; j < NReservationStations; j++)
@@ -530,7 +552,16 @@ void taskManager()
     fillingInstructions();
     fillingReservationStation();
     fillingMapper();
-    runOneStep();
+
+    while (writng_counter != scheduleStation.size())
+    {
+        issue();
+        execute(); 
+        writeResult();
+        cycle++;
+    }
+    printScheduleStation();
+   /* runOneStep();
     print();
     runOneStep();
     print();
@@ -570,7 +601,7 @@ void taskManager()
     print();
     runOneStep();
     print();
-    runOneStep();
+    runOneStep();*/
   
 	/*while (writng_counter != scheduleStation.size())
 	{
