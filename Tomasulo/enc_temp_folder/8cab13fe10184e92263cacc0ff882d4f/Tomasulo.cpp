@@ -14,7 +14,6 @@ int PC = 0; // program counter
 vector<int>R(NRegisters, -1);
 int jumpTo = 0; // the instruction to jump to
 bool isJump = false; // if the program is jumping
-bool numberOfJumps = 0; // number of jumps
 int cycle = 0;
 bool isFinished = false;
 int writng_counter = 0;
