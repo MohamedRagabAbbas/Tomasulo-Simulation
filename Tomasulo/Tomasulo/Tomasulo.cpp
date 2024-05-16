@@ -391,6 +391,10 @@ void issue()
 					{
 						registerStatus[scheduleStation[i].dest].q = reservationStation[isBusy_var.first].name; // set the reservation station of the destination
 					}
+					if (scheduleStation[i].op == "LOAD" || scheduleStation[i].op == "STORE") // if the operation is load or store
+					{
+						reservationStation[isBusy_var.first].A = scheduleStation[i].imm;
+					}
 					return;
 				}
 			}
@@ -404,11 +408,15 @@ void execute()
 	{
 		if (reservationStation[i].busy)
 		{
-			if (reservationStation[i].qj == -1 && reservationStation[i].qk == -1) // if the sources are ready
+			if (scheduleStation[reservationStation[i].instructionId].executionCycle_start == -1) // if the instruction is not executed yet
 			{
-				scheduleStation[reservationStation[i].instructionId].executionCycle_start_set(cycle);
-				scheduleStation[reservationStation[i].instructionId].executionCycle_end_set(cycle + numberOfcycles[reservationStation[i].op]);
+                if (reservationStation[i].qj == -1 && reservationStation[i].qk == -1) // if the sources are ready
+                {
+                    scheduleStation[reservationStation[i].instructionId].executionCycle_start_set(cycle);
+                    scheduleStation[reservationStation[i].instructionId].executionCycle_end_set(cycle + numberOfcycles[reservationStation[i].op]);
+                }
 			}
+			
 		}
 	}
 }
