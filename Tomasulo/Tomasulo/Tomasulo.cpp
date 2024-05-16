@@ -230,7 +230,7 @@ void fillingMapper()
     mapper["NAND"] = { "NAND1","NAND2"};
     mapper["MUL"] = { "MUL" };
 }
-map<string, int> numberOfcycles = { {"LOAD", 6}, {"STORE", 6}, {"BEQ", 1}, {"CALL/RET", 1}, {"ADD", 2},
+map<string, int> numberOfcycles = { {"LOAD", 6}, {"STORE", 6}, {"BEQ", 1}, {"CALL", 1},{"RET",1}, {"ADD", 2},
 									{"ADDI", 2}, {"NAND", 2}, {"MUL", 10} };
 
 enum instructionType {
