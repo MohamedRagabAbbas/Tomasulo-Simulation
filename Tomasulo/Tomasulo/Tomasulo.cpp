@@ -30,9 +30,21 @@ public:
     Instruction(int instructionId, const string& inst) : instructionId(instructionId), dest(-1), src1(-1), src2(-1), imm(-1), issuingCycle(-1), executionCycle_start(-1), executionCycle_end(-1), writingCycle(-1) {
         string inst_op;
         string word;
+		name = inst;
         bool first_time = true;
         int comma_count = 0;
-        for (int i = 0; i < inst.length(); i++) {
+		int i = 0;
+        for (int j = 0; j < inst.length(); j++)
+        {
+            if (inst[j] == ' ')
+			{
+				i = j;
+				break;
+			}
+            inst_op = word;
+            word = "";
+        }
+        for (; i < inst.length(); i++) {
             if ((inst[i] == ' ' && first_time) || (i == inst.length() - 1 && first_time)) {
                 inst_op = inst.substr(0, i);
                 if (i == inst.length() - 1)
@@ -200,17 +212,14 @@ void fillingReservationStation()
 map<string, vector<string>> mapper;
 void fillingMapper()
 {
-    mapper["LOAD1"] = { "LOAD" };
-    mapper["LOAD2"] = { "LOAD" };
+    mapper["LOAD"] = { "LOAD1","LOAD2"};
     mapper["STORE"] = { "STORE" };
     mapper["BEQ"] = { "BEQ" };
-    mapper["CALL/RET"] = { "CALL", "RET" };
-    mapper["ADD/ADDI1"] = { "ADD" };
-    mapper["ADD/ADDI2"] = { "ADD" };
-    mapper["ADD/ADDI3"] = { "ADD" };
-    mapper["ADD/ADDI4"] = { "ADD" };
-    mapper["NAND1"] = { "NAND" };
-    mapper["NAND2"] = { "NAND" };
+    mapper["CALL"] = { "CALL/RET" };
+    mapper["RET"] = { "CALL/RET" };
+    mapper["ADD"] = { "ADD/ADDI1","ADD/ADDI2","ADD/ADDI3","ADD/ADDI4" };
+    mapper["ADDI"] = { "ADD/ADDI1","ADD/ADDI2","ADD/ADDI3","ADD/ADDI4" };
+    mapper["NAND"] = { "NAND1","NAND2"};
     mapper["MUL"] = { "MUL" };
 }
 
@@ -275,7 +284,7 @@ vector<RegisterStatus> registerStatus = fillingRegisterStatus();
 void printReservationStation()
 {
     cout << left; // Left-align the output
-    cout << setw(15) << "Instruction ID" << setw(10) << "Name" << setw(5) << "Busy" << setw(5) << "Op"
+    cout << setw(15) << "Instruction ID" << setw(10) << "Name" << setw(5) << "Busy" << setw(10) << "Op"
         << setw(5) << "Vj" << setw(5) << "Vk" << setw(5) << "Qj" << setw(5) << "Qk" << setw(5) << "A" << endl;
 
     for (int i = 0; i < NReservationStations; i++)
@@ -283,7 +292,7 @@ void printReservationStation()
         cout << setw(15) << reservationStation[i].instructionId
             << setw(10) << reservationStation[i].name
             << setw(5) << reservationStation[i].busy
-            << setw(5) << reservationStation[i].op
+            << setw(10) << reservationStation[i].op
             << setw(5) << reservationStation[i].vj
             << setw(5) << reservationStation[i].vk
             << setw(5) << reservationStation[i].qj
@@ -294,23 +303,31 @@ void printReservationStation()
 void printRegisterStatus()
 {
     cout << left; // Left-align the output
-    cout << setw(15) << "Register Name" << setw(10) << "Q" << endl;
-
+    for (int i = 0; i < NRegisters; i++) {
+        registerStatus[i].registerName = "Reg" + to_string(i + 1);
+    }
+    cout << setw(20) << "Register Name";
+    for (int i = 0; i < NRegisters; i++) {
+        cout << setw(10)<< registerStatus[i].registerName;
+    }
+	cout << endl;
+    cout << setw(20) << "Q";
     for (int i = 0; i < NRegisters; i++)
     {
-        cout << setw(15) << registerStatus[i].registerName << setw(10) << registerStatus[i].q << endl;
+        cout<< registerStatus[i].q<< setw(5);
     }
+    cout << endl;
 }
 void printScheduleStation()
 {
     cout << left; // Left-align the output
-    cout << setw(15) << "Instruction ID" << setw(10) << "Name" << setw(10) << "Issue" << setw(10) << "Execute"
+    cout << setw(15) << "Instruction ID" << setw(30) << "Name" << setw(10) << "Issue" << setw(10) << "Execute"
         << setw(15) << "Write Result" << endl;
 
     for (int i = 0; i < scheduleStation.size(); i++)
     {
         cout << setw(15) << scheduleStation[i].instructionId
-            << setw(10) << scheduleStation[i].name
+            << setw(30) << scheduleStation[i].name
             << setw(10) << scheduleStation[i].issuingCycle
             << setw(10) << scheduleStation[i].executionCycle_end
             << setw(15) << scheduleStation[i].writingCycle << endl;
@@ -323,11 +340,36 @@ void printVector(vector<string> v)
     cout << endl;
 }
 
-
+pair<int, bool> isBusy(string func)
+{
+    pair<int, bool> isBusy_var;
+	for (int i = 0; i < NReservationStations; i++)
+		if (reservationStation[i].name == func)
+            isBusy_var = { i,reservationStation[i].busy };
+	return isBusy_var;
+}
 void issue()
 {
-
+	for (int i = 0; i < scheduleStation.size(); i++)
+	{
+		if (scheduleStation[i].issuingCycle == -1) // means not issued yet
+		{
+			for (int j = 0; j < mapper[scheduleStation[i].op].size(); j++)
+			{
+				pair<int, bool> isBusy_var = isBusy(mapper[scheduleStation[i].op][j]);
+				if (!isBusy_var.second) // if the reservation station is not busy
+				{
+					scheduleStation[i].issuingCycle_set(cycle); // set the issuing cycle
+					reservationStation[isBusy_var.first].instructionId = scheduleStation[i].instructionId; // set the instruction id
+					reservationStation[isBusy_var.first].busy = true; // set the reservation station to busy
+					reservationStation[isBusy_var.first].op = scheduleStation[i].op; // set the operation
+					return;
+				}
+			}
+		}
+	}
 }
+
 void execute()
 {
 
@@ -343,18 +385,14 @@ void taskManager()
     fillingInstructions();
     fillingReservationStation();
     fillingMapper();
+	issue();
+
+
     printScheduleStation();
-    //while()
-    // for(int i=0; i < 5; i++)
-    // {
-    //     cout << "Cycle: " << cycle << endl;
-    //     issue();
-    //     execute();
-    //     write();
-    //     printScheduleStation();
-    //     printReservationStation();
-    //     printRegisterStatus();
-    // }
+	cout << "---------------------------------------------" << endl;
+	printReservationStation();
+    cout << "---------------------------------------------" << endl;
+	printRegisterStatus();
 }
 
 int main()
