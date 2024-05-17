@@ -89,7 +89,25 @@ public:
     }
 
     void parse_I_inst(const string& inst) {
-        // Implementation for I-type instruction parsing
+        int index = inst.find(' ');
+        op = inst.substr(0, index);
+
+        while (inst[index] == ' ') index++;
+        rA = inst[index + 1] - '0';
+
+        index += 2;
+        while (inst[index] == ' ' || inst[index] == ',') index++;
+        rB = inst[index + 1] - '0';
+
+        index += 2;
+        while (inst[index] == ' ' || inst[index] == ',') index++;
+
+        int stop = index;
+        while (inst[stop + 1] != ' ') stop++;
+
+        imm = stoi(inst.substr(index, stop - index + 1));
+
+        //cout << "rA: " << rA << " rB: " << rB << " imm: " << imm << "\n";
     }
 
     void parse_BRANCH_inst(const string& inst) {

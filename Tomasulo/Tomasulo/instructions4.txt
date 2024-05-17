@@ -4,3 +4,4 @@ LOAD r3, 2(r2)
 ADD r4, r2, r3      
 MUL r5, r2, r3  
 NAND r6, r2, r3
+ADDI r7, r5, 11

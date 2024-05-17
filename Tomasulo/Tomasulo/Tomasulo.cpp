@@ -389,17 +389,12 @@ void writeResult()
                     else if (op == "STORE") {
                         memory[reservationStation[i].result] = registers[scheduleStation[reservationStation[i].instructionId].rA];
                     }
-                    else if (op == "ADD" || op == "NAND" || op == "MUL") {
+                    else if (op == "ADD" || op == "ADDI" || op == "NAND" || op == "MUL") {
                         int dest = scheduleStation[reservationStation[i].instructionId].rA;
                         if (dest != 0) registers[dest] = reservationStation[i].result;
                     }
-                    // else if (op == "STORE") {
-                    //     int addr = reservationStation[i].A + registers[scheduleStation[reservationStation[i].instructionId].rB];
-                    //     //int result = registers[scheduleStation[reservationStation[i].instructionId].rA];
-                    //     memory[addr] = registers[reservationStation[i].result];
-                    // }
 
-                    // I moved this a bit downwards as I needed the A for the store
+                    // I moved this a bit downwards as I needed the A for the store (nvm i don't need now but i left it here)
                     scheduleStation[instruction_index].writingCycle = cycle;
                     reservationStation[i].busy = false;
                     reservationStation[i].op = "";
