@@ -1,11 +1,10 @@
 LOAD r2, 8(r0)    
-STORE r0, 30(r0)
 LOAD r3, 2(r0) 
 ADD r4, r2, r3  
 ADDI r5, r2, 3
 BEQ r4, r5, 2
 NAND r6, r2, r3
 ADDI r7, r5, 11
-ADDI r4, r0, 12
-ADDI r5, r0, 12
+ADDI r6, r0, 12
+ADDI r6, r0, 12
 ADDI r6, r0, 12

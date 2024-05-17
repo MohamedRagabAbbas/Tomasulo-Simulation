@@ -135,10 +135,11 @@ pair<int, bool> isBusy(string func) {
     return isBusy_var;
 }
 
+int stop = NReservationStations;
 //----------------------------------------------------------------------------ISSUE----------------------------------------------------------------------------
 int isCall = 0;
 // if the instruction call is issued
-
+int isBEQ = 0;
 
 void issue()
 {
@@ -168,6 +169,11 @@ void issue()
             {
                 isCall = 2;
             }
+			if (scheduleStation[i].op == "BEQ")
+            {
+				isBEQ = 1;
+				stop = i + 1;
+			}
             PC++;
             reservationStation[isBusy_var.first].instructionId = scheduleStation[i].instructionId; // mark RS is responsible for which instruction
             reservationStation[isBusy_var.first].busy = true; // mark RS as busy
@@ -281,7 +287,7 @@ void executeInstLogic(ReservationStation& station, string op) {
         station.result = station.A + station.vj; // imm + rB
     }
     else if (op == "BEQ") {
-        //station.result = (station.vj != station.vk);
+        station.result = (station.vj != station.vk);
     }
     else if (op == "CALL") {
 
@@ -307,9 +313,9 @@ void executeInstLogic(ReservationStation& station, string op) {
 void execute()
 {
 
-    for (int i = 0; i < NReservationStations; i++)
+    for (int i = 0; i < reservationStation.size(); i++)
     {
-        if (reservationStation[i].busy)
+        if (reservationStation[i].busy && reservationStation[i].instructionId<stop)
         {
             // if the instruction is not executed yet or the program jumped 
             if (isExecuted_in_functionsStack[numberOfJumps][reservationStation[i].instructionId] == false &&
@@ -359,6 +365,15 @@ void flush(int call_id)
 //----------------------------------------------------------------------------WRITE----------------------------------------------------------------------------
 
 bool isLastInstruction_v = 0;
+int getReservationStationIndex(int instructionId)
+{
+	for (int i = 0; i < NReservationStations; i++)
+	{
+		if (reservationStation[i].instructionId == instructionId)
+			return i;
+	}
+	return -1;
+}
 void writeResult()
 {
     // if call.write == cycle + 2 flush the two instructions after the call
@@ -379,6 +394,20 @@ void writeResult()
                 int instruction_index = getInstructionIndex(reservationStation[i].instructionId);
                 if (instruction_index != -1)
                 {
+					//// if many instructions are executed in the cycle
+					//for (int q = 0; q < scheduleStation.size(); q++)
+     //               {
+     //                   if (scheduleStation[q].executionCycleEnd <= cycle + 1)
+     //                   {
+     //                       if (q < instruction_index)
+     //                       {
+     //                           instruction_index = q;
+					//			i = getReservationStationIndex(scheduleStation[q].instructionId);
+					//			break;
+     //                       }
+					//	}
+					//}
+
 					// if last we write in the last instruction
 					if (instruction_index == scheduleStation.size() - 1)
 						isLastInstruction_v = 1;
@@ -419,7 +448,14 @@ void writeResult()
                         if (dest != 0) registers[dest] = reservationStation[i].result;
                     }
                     else if (op == "BEQ") {
+                        if (scheduleStation[instruction_index].rA == scheduleStation[instruction_index].rB)
+                        {
 
+                        } 
+                        else
+                        {
+                            stop = scheduleStation.size();
+                        }
 					}
 					else if (op == "CALL") {
 
@@ -477,7 +513,7 @@ void writeResult()
                             registerStatus[j].q = "";
                         }
                     }
-
+                   // return;
 
                 }
 
@@ -486,6 +522,7 @@ void writeResult()
     }
 
 }
+
 
 void runOneStep()
 {
@@ -626,12 +663,16 @@ void taskManager() {
     computeNumberOfInstructionsBtwCallAndRet();
 
     //writng_counter != scheduleStation.size()
-    while (!(writng_counter == scheduleStation.size() && isLastInstruction_v)) {
+    while (true) {
         issue();
         execute();
         writeResult();
         print();
         cycle++;
+        if(writng_counter == scheduleStation.size() && !isJump)
+			break;
+		if(writng_counter == scheduleStation.size() && isLastInstruction_v)
+			break;
     }
     cout << "---------------------------------------------------------------------------------------------------------------------------" << endl;
     printScheduleStation();
