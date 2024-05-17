@@ -58,12 +58,10 @@ public:
         op = inst.substr(0, index);
 
         while (inst[index] == ' ') index++;
-
         rA = inst[index + 1] - '0';
 
         index += 2;
         while (inst[index] == ' ' || inst[index] == ',') index++;
-
         int bracket = inst.find('(');
 
         imm = stoi(inst.substr(index, bracket - index + 1));
@@ -73,7 +71,21 @@ public:
     }
 
     void parse_R_inst(const string& inst) {
-        // Implementation for R-type instruction parsing
+        int index = inst.find(' ');
+        op = inst.substr(0, index);
+
+        while (inst[index] == ' ') index++;
+        rA = inst[index + 1] - '0';
+
+        index += 2;
+        while (inst[index] == ' ' || inst[index] == ',') index++;
+        rB = inst[index + 1] - '0';
+
+        index += 2;
+        while (inst[index] == ' ' || inst[index] == ',') index++;
+        rC = inst[index + 1] - '0';
+
+        //cout << "rA: " << rA << " rB: " << rB << " rC: " << rC << "\n";
     }
 
     void parse_I_inst(const string& inst) {

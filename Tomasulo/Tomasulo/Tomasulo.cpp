@@ -250,11 +250,12 @@ bool isBranchTaken(int instructionId)
 
 void executeInstLogic(ReservationStation& station, string op) {
 
+    // compute address for LOAD & STORE
     if (op == "LOAD") {
-        station.result = memory[station.A];
+        station.result = station.A + station.vj; // imm + rB
     }
     else if (op == "STORE") {
-        station.result = scheduleStation[station.instructionId].rA;
+        station.result = station.A + station.vj; // imm + rB
     }
     else if (op == "BEQ") {
         //station.result = (station.vj != station.vk);
@@ -269,10 +270,10 @@ void executeInstLogic(ReservationStation& station, string op) {
         station.result = station.vj + station.vk;
     }
     else if (op == "ADDI") {
-        station.result = station.vj + station.A;
+        station.result = station.A + station.vj;
     }
     else if (op == "NAND") {
-        //station.result = ~(station.vj & station.vk);
+        station.result = ~(station.vk & station.vj);
     }
     else if (op == "MUL") {
         station.result = station.vj * station.vk;
@@ -381,16 +382,22 @@ void writeResult()
                         numberOfJumps++;
                         // flush the two instructions after the call
                     }
-                    else if (op == "LOAD" || op == "ADD" || op == "ADDI" || op == "MUL" || op == "NAND") {
-                        if (scheduleStation[reservationStation[i].instructionId].rA != 0) {
-                            registers[scheduleStation[reservationStation[i].instructionId].rA] = reservationStation[i].result;
-                        }
+                    else if (op == "LOAD") {
+                        int dest = scheduleStation[reservationStation[i].instructionId].rA;
+                        if (dest != 0) registers[dest] = memory[reservationStation[i].result];
                     }
                     else if (op == "STORE") {
-                        int addr = reservationStation[i].A + registers[scheduleStation[reservationStation[i].instructionId].rB];
-                        //int result = registers[scheduleStation[reservationStation[i].instructionId].rA];
-                        memory[addr] = registers[reservationStation[i].result];
+                        memory[reservationStation[i].result] = registers[scheduleStation[reservationStation[i].instructionId].rA];
                     }
+                    else if (op == "ADD" || op == "NAND" || op == "MUL") {
+                        int dest = scheduleStation[reservationStation[i].instructionId].rA;
+                        if (dest != 0) registers[dest] = reservationStation[i].result;
+                    }
+                    // else if (op == "STORE") {
+                    //     int addr = reservationStation[i].A + registers[scheduleStation[reservationStation[i].instructionId].rB];
+                    //     //int result = registers[scheduleStation[reservationStation[i].instructionId].rA];
+                    //     memory[addr] = registers[reservationStation[i].result];
+                    // }
 
                     // I moved this a bit downwards as I needed the A for the store
                     scheduleStation[instruction_index].writingCycle = cycle;
