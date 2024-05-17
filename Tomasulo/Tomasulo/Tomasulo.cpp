@@ -100,16 +100,19 @@ vector<RegisterStatus> registerStatus = fillingRegisterStatus();
 
 
 // take image form the reservation station and status register and wait to know whether the branch is taken or not
+vector<Instruction> scheduleStation_image;
 vector<ReservationStation> reservationStation_image;
 vector<RegisterStatus> registerStatus_image;
 
 void takeImage() {
+	scheduleStation_image = scheduleStation;
     reservationStation_image = reservationStation;
     registerStatus_image = registerStatus;
 }
 
 // restore the reservation station and status register
 void restoreImage() {
+	scheduleStation = scheduleStation_image;
     reservationStation = reservationStation_image;
     registerStatus = registerStatus_image;
 }
@@ -135,10 +138,24 @@ pair<int, bool> isBusy(string func) {
     return isBusy_var;
 }
 
+int stop = NReservationStations;
 //----------------------------------------------------------------------------ISSUE----------------------------------------------------------------------------
+int isCall = 0;
+// if the instruction call is issued
+
+int isBEQ = 0;
+bool isBranchTaken_vr = 0;
+vector<int> istructionsId;
+vector<int> reservationStationId;
+
 
 void issue()
 {
+	if (isCall > 0)
+	{
+		isCall--;
+		return;
+	}
     //for (int i = PC; i < scheduleStation.size(); i++)
     //{
     //	if (registers[1] == -1) // means the return address is set
@@ -156,6 +173,20 @@ void issue()
         {
             //scheduleStation[i].issuingCycle_set(cycle); // set the issuing cycle
             scheduleStation[i].issuingCycle = cycle;
+            if (scheduleStation[i].op == "CALL" )
+            {
+                isCall = 2;
+            }
+			if (scheduleStation[i].op == "BEQ")
+            {
+				isBEQ = 1;
+				stop = i + 1;
+			}
+            if (isBEQ && scheduleStation[i].op != "BEQ")
+            {
+				istructionsId.push_back(scheduleStation[i].instructionId);
+				reservationStationId.push_back(isBusy_var.first);
+            }
             PC++;
             reservationStation[isBusy_var.first].instructionId = scheduleStation[i].instructionId; // mark RS is responsible for which instruction
             reservationStation[isBusy_var.first].busy = true; // mark RS as busy
@@ -214,8 +245,19 @@ int getInstructionIndex(int instructionId) {
     }
     return -1;
 }
-
-int pointer = 0;
+int numberOfInstructionsBtwCallAndRet = 0;
+// if there is a call instruction and the return address is set, then compute numberOfInstructionsBtwCallAndRet 
+void computeNumberOfInstructionsBtwCallAndRet()
+{
+	for (int i = 0; i < scheduleStation.size(); i++)
+	{
+		if (scheduleStation[i].op == "CALL" && registers[1] != -1)
+		{
+			numberOfInstructionsBtwCallAndRet = i;
+			break;
+		}
+	}
+}
 
 //2d vector to store the instructions that are executed in the functions stack
 vector<vector<bool>> isExecuted_in_functionsStack;
@@ -258,7 +300,7 @@ void executeInstLogic(ReservationStation& station, string op) {
         station.result = station.A + station.vj; // imm + rB
     }
     else if (op == "BEQ") {
-        //station.result = (station.vj != station.vk);
+        station.result = (station.vj != station.vk);
     }
     else if (op == "CALL") {
 
@@ -280,11 +322,13 @@ void executeInstLogic(ReservationStation& station, string op) {
     }
 }
 
+
 void execute()
 {
-    for (int i = 0; i < NReservationStations; i++)
+
+    for (int i = 0; i < reservationStation.size(); i++)
     {
-        if (reservationStation[i].busy)
+        if (reservationStation[i].busy && reservationStation[i].instructionId<stop)
         {
             // if the instruction is not executed yet or the program jumped 
             if (isExecuted_in_functionsStack[numberOfJumps][reservationStation[i].instructionId] == false &&
@@ -299,55 +343,53 @@ void execute()
                     executeInstLogic(reservationStation[i], scheduleStation[reservationStation[i].instructionId].op);
                     //map<int, bool> isExecuted = isExecuted_in_functionsStack[reservationStation[i].instructionId];
                 }
-                if (isJump)
-                {
-                    pointer = i + 1;
-                }
-            }
 
+            }
         }
     }
 }
 
+
 //flush the two instructions after the call
-void flush(int call_id)
+void flush()
 {
-    for (int i = call_id; i < call_id + 2; i++)
+    for (int i = 0; i < istructionsId.size(); i++)
     {
-        scheduleStation[i].issuingCycle = -1;
-        scheduleStation[i].executionCycleStart = -1;
-        scheduleStation[i].executionCycleEnd = -1;
-        scheduleStation[i].writingCycle = -1;
-        registerStatus[scheduleStation[i].rA].q = "";
-        for (int j = 0; j < NReservationStations; j++) {
-            if (reservationStation[j].instructionId == scheduleStation[i].instructionId)
+		scheduleStation[istructionsId[i]].issuingCycle = -1;
+        for (int j = 0; j < NRegisters; j++)
+        {
+			if (registerStatus[j].q == reservationStation[reservationStationId[i]].name)
             {
-                reservationStation[j].busy = false;
-                reservationStation[j].op = "";
-                reservationStation[j].vj = -1;
-                reservationStation[j].vk = -1;
-                reservationStation[j].qj = -1;
-                reservationStation[j].qk = -1;
-                reservationStation[j].A = -1;
-            }
+				registerStatus[j].q = "";
+			}
         }
     }
-
+	for (int i = 0; i < reservationStationId.size(); i++)
+	{
+		reservationStation[reservationStationId[i]].busy = false;
+		reservationStation[reservationStationId[i]].op = "";
+		reservationStation[reservationStationId[i]].vj = -1;
+		reservationStation[reservationStationId[i]].vk = -1;
+		reservationStation[reservationStationId[i]].qj = -1;
+		reservationStation[reservationStationId[i]].qk = -1;
+		reservationStation[reservationStationId[i]].A = -1;
+	}
 }
 
 //----------------------------------------------------------------------------WRITE----------------------------------------------------------------------------
 
-
+bool isLastInstruction_v = 0;
+int getReservationStationIndex(int instructionId)
+{
+	for (int i = 0; i < NReservationStations; i++)
+	{
+		if (reservationStation[i].instructionId == instructionId)
+			return i;
+	}
+	return -1;
+}
 void writeResult()
 {
-    // if call.write == cycle + 2 flush the two instructions after the call
-    for (int b = 0; b < scheduleStation.size(); b++)
-    {
-        if (scheduleStation[b].op == "CALL" && scheduleStation[b].writingCycle != -1 && scheduleStation[b].writingCycle + 1 == cycle)
-        {
-            flush(b + 1);
-        }
-    }
     for (int i = 0; i < NReservationStations; i++)
     {
         if (reservationStation[i].busy)
@@ -358,22 +400,46 @@ void writeResult()
                 int instruction_index = getInstructionIndex(reservationStation[i].instructionId);
                 if (instruction_index != -1)
                 {
+					//// if many instructions are executed in the cycle
+					//for (int q = 0; q < scheduleStation.size(); q++)
+     //               {
+     //                   if (scheduleStation[q].executionCycleEnd <= cycle + 1)
+     //                   {
+     //                       if (q < instruction_index)
+     //                       {
+     //                           instruction_index = q;
+					//			i = getReservationStationIndex(scheduleStation[q].instructionId);
+					//			break;
+     //                       }
+					//	}
+					//}
+
+					// if last we write in the last instruction
+					if (instruction_index == scheduleStation.size() - 1)
+						isLastInstruction_v = 1;
+					else isLastInstruction_v = 0;
+
                     if (scheduleStation[instruction_index].writingCycle == -1) // only update the writing cycle once
                         writng_counter++;
                     // if it is call set registers[1] to the return address which is the next instruction ctyle + 1
                     if (scheduleStation[instruction_index].op == "CALL")
                     {
-                        registers[1] = cycle - 1;
+                        registers[1] = cycle - 2;
                         // registers[1] = cycle - numberOfcycles["CALL"] ;
                         isJump = true;
                         jumpTo = scheduleStation[instruction_index].imm;
-                        PC = jumpTo;
-                        for (int l = 0; l <= instruction_index; l++)
+                        PC = jumpTo + instruction_index + 1;
+                        /*for (int l = 0; l <= instruction_index; l++)
                         {
                             isExecuted_in_functionsStack[numberOfJumps + 1][l] = true;
-                        }
-
+                        }*/
                     }
+					else if (scheduleStation[instruction_index].op == "RET")
+                    {
+						PC = registers[1];
+						registers[1] = -1;
+						numberOfJumps++;
+					}
                     string op = scheduleStation[instruction_index].op;
 
                     if (op == "LOAD") {
@@ -388,17 +454,27 @@ void writeResult()
                         if (dest != 0) registers[dest] = reservationStation[i].result;
                     }
                     else if (op == "BEQ") {
+                        if (registers[scheduleStation[instruction_index].rB] == registers[scheduleStation[instruction_index].rC])
+                        {
+                            isBEQ = 0;
+							stop = scheduleStation.size();
+                            flush();
+							PC = scheduleStation[instruction_index].imm + instruction_index + 1;
+							isBranchTaken_vr = 1;
+                        } 
+                        else
+                        {
+                            stop = scheduleStation.size();
+							isBEQ = 0;
 
-                    }
-                    else if (op == "RET") {
-                        PC = registers[1];
-                        registers[1] = -1;
-                        numberOfJumps++;
-                        // flush the two instructions after the call
-                    }
-                    else if (op == "CALL") {
+                        }
+					}
+					else if (op == "CALL") {
 
-                    }
+					}
+					else if (op == "RET") {
+
+					}
 
                     // I moved this a bit downwards as I needed the A for the store (nvm i don't need now but i left it here)
                     scheduleStation[instruction_index].writingCycle = cycle;
@@ -449,7 +525,7 @@ void writeResult()
                             registerStatus[j].q = "";
                         }
                     }
-
+                   // return;
 
                 }
 
@@ -458,6 +534,7 @@ void writeResult()
     }
 
 }
+
 
 void runOneStep()
 {
@@ -472,8 +549,8 @@ void runOneStep()
 void printReservationStation()
 {
     cout << left; // Left-align the output
-    cout << setw(12) << "Id" << setw(18) << "Instruction ID" << setw(18) << "Name" << setw(12) << "Busy" << setw(12) << "Op"
-        << setw(12) << "Vj" << setw(12) << "Vk" << setw(12) << "Qj" << setw(12) << "Qk" << setw(12) << "A" << endl;
+    cout << setw(12) << "Id" << setw(18) << "Instruction ID" << setw(18) << "Name" << setw(11) << "Busy" << setw(11) << "Op"
+        << setw(11) << "Vj" << setw(12) << "Vk" << setw(11) << "Qj" << setw(11) << "Qk" << setw(11) << "A" << endl;
 
     cout << "\n";
     for (int i = 0; i < NReservationStations; i++)
@@ -481,13 +558,13 @@ void printReservationStation()
         cout << setw(12) << reservationStation[i].id
             << setw(18) << reservationStation[i].instructionId
             << setw(18) << reservationStation[i].name
-            << setw(12) << reservationStation[i].busy
-            << setw(12) << reservationStation[i].op
-            << setw(12) << reservationStation[i].vj
-            << setw(12) << reservationStation[i].vk
-            << setw(12) << reservationStation[i].qj
-            << setw(12) << reservationStation[i].qk
-            << setw(12) << reservationStation[i].A << endl;
+            << setw(11) << reservationStation[i].busy
+            << setw(11) << reservationStation[i].op
+            << setw(11) << reservationStation[i].vj
+            << setw(11) << reservationStation[i].vk
+            << setw(11) << reservationStation[i].qj
+            << setw(11) << reservationStation[i].qk
+            << setw(11) << reservationStation[i].A << endl;
     }
 }
 
@@ -507,14 +584,19 @@ void printScheduleStation()
     cout << left; // Left-align the output
     cout << setw(20) << "Instruction ID" << setw(30) << "Name" << setw(20) << "Issue" << setw(20) << "Start Execution" <<
         setw(20) << "End Execution" << setw(20) << "Write Result" << endl;
+	int calculateAddress = 0;
+
 
     cout << "\n";
     for (int i = 0; i < scheduleStation.size(); i++)
     {
+        if ((scheduleStation[i].op == "LOAD" || scheduleStation[i].op == "STORE")  && scheduleStation[i].executionCycleStart !=-1)
+            calculateAddress = 2;
+		else calculateAddress = 0;
         cout << setw(20) << scheduleStation[i].instructionId
             << setw(30) << scheduleStation[i].name
             << setw(20) << scheduleStation[i].issuingCycle
-            << setw(20) << scheduleStation[i].executionCycleStart
+            << setw(20) << scheduleStation[i].executionCycleStart + calculateAddress
             << setw(20) << scheduleStation[i].executionCycleEnd
             << setw(20) << scheduleStation[i].writingCycle << endl;
     }
@@ -527,7 +609,7 @@ void printVector(vector<string>& v)
 }
 
 void print() {
-    cout << "\n\n----------------------------------------------------------" << "Cycle " << cycle - 1
+    cout << "\n\n----------------------------------------------------------" << "Cycle " << cycle
         << "----------------------------------------------------------" << endl;
     cout << endl;
     printScheduleStation();
@@ -583,19 +665,28 @@ void read_memory_file(string mem_file) {
 }
 
 void taskManager() {
-    read_instructions_file("instructions2.txt");
+
+    read_instructions_file("instructions5.txt");
     read_memory_file("memory.txt");
     fillingInstructions();
     fillingReservationStation();
     fillingMapper();
     filling_isExecuted_in_functionsStack();
+    computeNumberOfInstructionsBtwCallAndRet();
 
-    while (writng_counter != scheduleStation.size()) {
+    //writng_counter != scheduleStation.size()
+    while (true) {
         issue();
         execute();
         writeResult();
-        //print();
+        print();
         cycle++;
+        if(writng_counter == scheduleStation.size() && !isJump)
+			break;
+		if(writng_counter == scheduleStation.size() && isLastInstruction_v)
+			break;
+        if(isBranchTaken_vr && isLastInstruction_v)
+			break;
     }
     cout << "---------------------------------------------------------------------------------------------------------------------------" << endl;
     printScheduleStation();
@@ -604,56 +695,6 @@ void taskManager() {
         cout << "R" << i << ": " << registers[i] << "\n";
     }
     cout << "Memory[40]: " << memory[40];
-    /* runOneStep();
-     print();
-     runOneStep();
-     print();
-     runOneStep();
-     print();
-     runOneStep();
-     print();
-     runOneStep();
-     print();
-     runOneStep();
-     print();
-     runOneStep();
-     print();
-     runOneStep();
-     print();
-     runOneStep();
-     print();
-     runOneStep();
-     print();
-     runOneStep();
-     print();
-     runOneStep();
-     print();
-     runOneStep();
-     print();
-     runOneStep();
-     print();
-     runOneStep();
-     print();
-     runOneStep();
-     print();
-     runOneStep();
-     print();
-     runOneStep();
-     print();
-     runOneStep();
-     print();
-     runOneStep();
-     print();
-     runOneStep();*/
-
-     /*while (writng_counter != scheduleStation.size())
-     {
-         issue();
-         execute();
-         writeResult();
-         cycle++;
-     }*/
-
 }
 
 int main() {

@@ -1,5 +1,5 @@
 ADDI r2, r0, 2
-CALL 6
+CALL 4
 ADD r3, r2, r2
 ADDI r5, r3, 3
 ADDI r2, r0, 10
