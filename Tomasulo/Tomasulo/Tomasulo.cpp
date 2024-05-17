@@ -144,6 +144,7 @@ int isCall = 0;
 // if the instruction call is issued
 
 int isBEQ = 0;
+bool isBranchTaken_vr = 0;
 vector<int> istructionsId;
 vector<int> reservationStationId;
 
@@ -459,6 +460,7 @@ void writeResult()
 							stop = scheduleStation.size();
                             flush();
 							PC = scheduleStation[instruction_index].imm + instruction_index + 1;
+							isBranchTaken_vr = 1;
                         } 
                         else
                         {
@@ -682,6 +684,8 @@ void taskManager() {
         if(writng_counter == scheduleStation.size() && !isJump)
 			break;
 		if(writng_counter == scheduleStation.size() && isLastInstruction_v)
+			break;
+        if(isBranchTaken_vr && isLastInstruction_v)
 			break;
     }
     cout << "---------------------------------------------------------------------------------------------------------------------------" << endl;
