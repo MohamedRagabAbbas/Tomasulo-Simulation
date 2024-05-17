@@ -136,9 +136,17 @@ pair<int, bool> isBusy(string func) {
 }
 
 //----------------------------------------------------------------------------ISSUE----------------------------------------------------------------------------
+int isCall = 0;
+// if the instruction call is issued
+
 
 void issue()
 {
+	if (isCall > 0)
+	{
+		isCall--;
+		return;
+	}
     //for (int i = PC; i < scheduleStation.size(); i++)
     //{
     //	if (registers[1] == -1) // means the return address is set
@@ -156,6 +164,10 @@ void issue()
         {
             //scheduleStation[i].issuingCycle_set(cycle); // set the issuing cycle
             scheduleStation[i].issuingCycle = cycle;
+            if (scheduleStation[i].op == "CALL" )
+            {
+                isCall = 2;
+            }
             PC++;
             reservationStation[isBusy_var.first].instructionId = scheduleStation[i].instructionId; // mark RS is responsible for which instruction
             reservationStation[isBusy_var.first].busy = true; // mark RS as busy
@@ -214,8 +226,19 @@ int getInstructionIndex(int instructionId) {
     }
     return -1;
 }
-
-int pointer = 0;
+int numberOfInstructionsBtwCallAndRet = 0;
+// if there is a call instruction and the return address is set, then compute numberOfInstructionsBtwCallAndRet 
+void computeNumberOfInstructionsBtwCallAndRet()
+{
+	for (int i = 0; i < scheduleStation.size(); i++)
+	{
+		if (scheduleStation[i].op == "CALL" && registers[1] != -1)
+		{
+			numberOfInstructionsBtwCallAndRet = i;
+			break;
+		}
+	}
+}
 
 //2d vector to store the instructions that are executed in the functions stack
 vector<vector<bool>> isExecuted_in_functionsStack;
@@ -280,8 +303,10 @@ void executeInstLogic(ReservationStation& station, string op) {
     }
 }
 
+
 void execute()
 {
+
     for (int i = 0; i < NReservationStations; i++)
     {
         if (reservationStation[i].busy)
@@ -299,12 +324,8 @@ void execute()
                     executeInstLogic(reservationStation[i], scheduleStation[reservationStation[i].instructionId].op);
                     //map<int, bool> isExecuted = isExecuted_in_functionsStack[reservationStation[i].instructionId];
                 }
-                if (isJump)
-                {
-                    pointer = i + 1;
-                }
-            }
 
+            }
         }
     }
 }
@@ -337,7 +358,7 @@ void flush(int call_id)
 
 //----------------------------------------------------------------------------WRITE----------------------------------------------------------------------------
 
-
+bool isLastInstruction_v = 0;
 void writeResult()
 {
     // if call.write == cycle + 2 flush the two instructions after the call
@@ -358,22 +379,32 @@ void writeResult()
                 int instruction_index = getInstructionIndex(reservationStation[i].instructionId);
                 if (instruction_index != -1)
                 {
+					// if last we write in the last instruction
+					if (instruction_index == scheduleStation.size() - 1)
+						isLastInstruction_v = 1;
+					else isLastInstruction_v = 0;
+
                     if (scheduleStation[instruction_index].writingCycle == -1) // only update the writing cycle once
                         writng_counter++;
                     // if it is call set registers[1] to the return address which is the next instruction ctyle + 1
                     if (scheduleStation[instruction_index].op == "CALL")
                     {
-                        registers[1] = cycle - 1;
+                        registers[1] = cycle - 2;
                         // registers[1] = cycle - numberOfcycles["CALL"] ;
                         isJump = true;
                         jumpTo = scheduleStation[instruction_index].imm;
-                        PC = jumpTo;
-                        for (int l = 0; l <= instruction_index; l++)
+                        PC = jumpTo + instruction_index + 1;
+                        /*for (int l = 0; l <= instruction_index; l++)
                         {
                             isExecuted_in_functionsStack[numberOfJumps + 1][l] = true;
-                        }
-
+                        }*/
                     }
+					else if (scheduleStation[instruction_index].op == "RET")
+                    {
+						PC = registers[1];
+						registers[1] = -1;
+						numberOfJumps++;
+					}
                     string op = scheduleStation[instruction_index].op;
 
                     if (op == "LOAD") {
@@ -389,16 +420,13 @@ void writeResult()
                     }
                     else if (op == "BEQ") {
 
-                    }
-                    else if (op == "RET") {
-                        PC = registers[1];
-                        registers[1] = -1;
-                        numberOfJumps++;
-                        // flush the two instructions after the call
-                    }
-                    else if (op == "CALL") {
+					}
+					else if (op == "CALL") {
 
-                    }
+					}
+					else if (op == "RET") {
+
+					}
 
                     // I moved this a bit downwards as I needed the A for the store (nvm i don't need now but i left it here)
                     scheduleStation[instruction_index].writingCycle = cycle;
@@ -588,18 +616,17 @@ void read_memory_file(string mem_file) {
 }
 
 void taskManager() {
-<<<<<<< HEAD
+
     read_instructions_file("instructions3.txt");
-=======
-    read_instructions_file("instructions2.txt");
->>>>>>> main
     read_memory_file("memory.txt");
     fillingInstructions();
     fillingReservationStation();
     fillingMapper();
     filling_isExecuted_in_functionsStack();
+    computeNumberOfInstructionsBtwCallAndRet();
 
-    while (writng_counter != scheduleStation.size()) {
+    //writng_counter != scheduleStation.size()
+    while (!(writng_counter == scheduleStation.size() && isLastInstruction_v)) {
         issue();
         execute();
         writeResult();
