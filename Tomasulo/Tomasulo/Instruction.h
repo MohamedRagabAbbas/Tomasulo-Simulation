@@ -116,11 +116,11 @@ public:
         op = inst.substr(0, index);
 
         while (inst[index] == ' ') index++;
-        rA = inst[index + 1] - '0';
+        rB = inst[index + 1] - '0';
 
         index += 2;
         while (inst[index] == ' ' || inst[index] == ',') index++;
-        rB = inst[index + 1] - '0';
+        rA = inst[index + 1] - '0';
 
         index += 2;
         while (inst[index] == ' ' || inst[index] == ',') index++;

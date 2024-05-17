@@ -542,7 +542,7 @@ void printScheduleStation()
     for (int i = 0; i < scheduleStation.size(); i++)
     {
         if ((scheduleStation[i].op == "LOAD" || scheduleStation[i].op == "STORE")  && scheduleStation[i].executionCycleStart !=-1)
-            calculateAddress = 1;
+            calculateAddress = 2;
 		else calculateAddress = 0;
         cout << setw(20) << scheduleStation[i].instructionId
             << setw(30) << scheduleStation[i].name
@@ -617,7 +617,7 @@ void read_memory_file(string mem_file) {
 
 void taskManager() {
 
-    read_instructions_file("instructions3.txt");
+    read_instructions_file("instructions5.txt");
     read_memory_file("memory.txt");
     fillingInstructions();
     fillingReservationStation();
