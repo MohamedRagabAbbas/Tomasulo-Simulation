@@ -67,7 +67,6 @@ public:
         imm = stoi(inst.substr(index, bracket - index + 1));
 
         rB = inst[bracket + 2] - '0';
-
     }
 
     void parse_R_inst(const string& inst) {
@@ -111,15 +110,31 @@ public:
     }
 
     void parse_BRANCH_inst(const string& inst) {
-        // Implementation for BEQ parsing
+        int index = inst.find(' ');
+        op = inst.substr(0, index);
+
+        while (inst[index] == ' ') index++;
+        rA = inst[index + 1] - '0';
+
+        index += 2;
+        while (inst[index] == ' ' || inst[index] == ',') index++;
+        rB = inst[index + 1] - '0';
+
+        index += 2;
+        while (inst[index] == ' ' || inst[index] == ',') index++;
+
+        int stop = index;
+        while (inst[stop + 1] != ' ') stop++;
+
+        imm = stoi(inst.substr(index, stop - index + 1));
+
+        cout << "rA: " << rA << " rB: " << rB << " imm: " << imm << "\n";
     }
 
     void parse_CALL_inst(const string& inst) {
-        // Implementation for CALL parsing
     }
 
     void parse_RET_inst(const string& inst) {
-        // Implementation for RET parsing
     }
 
     void print() {

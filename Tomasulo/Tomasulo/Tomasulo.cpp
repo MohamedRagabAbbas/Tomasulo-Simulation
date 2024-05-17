@@ -376,13 +376,7 @@ void writeResult()
                     }
                     string op = scheduleStation[instruction_index].op;
 
-                    if (op == "RET") {
-                        PC = registers[1];
-                        registers[1] = -1;
-                        numberOfJumps++;
-                        // flush the two instructions after the call
-                    }
-                    else if (op == "LOAD") {
+                    if (op == "LOAD") {
                         int dest = scheduleStation[reservationStation[i].instructionId].rA;
                         if (dest != 0) registers[dest] = memory[reservationStation[i].result];
                     }
@@ -392,6 +386,18 @@ void writeResult()
                     else if (op == "ADD" || op == "ADDI" || op == "NAND" || op == "MUL") {
                         int dest = scheduleStation[reservationStation[i].instructionId].rA;
                         if (dest != 0) registers[dest] = reservationStation[i].result;
+                    }
+                    else if (op == "BEQ") {
+
+                    }
+                    else if (op == "RET") {
+                        PC = registers[1];
+                        registers[1] = -1;
+                        numberOfJumps++;
+                        // flush the two instructions after the call
+                    }
+                    else if (op == "CALL") {
+
                     }
 
                     // I moved this a bit downwards as I needed the A for the store (nvm i don't need now but i left it here)
