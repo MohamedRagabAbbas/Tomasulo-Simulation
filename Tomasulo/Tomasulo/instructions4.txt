@@ -6,3 +6,4 @@ MUL r5, r2, r3
 NAND r6, r2, r3
 ADDI r7, r5, 11
 BEQ r0, r0, 4
+CALL 11
