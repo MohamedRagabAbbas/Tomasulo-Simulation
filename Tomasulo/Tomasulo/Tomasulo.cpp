@@ -507,14 +507,19 @@ void printScheduleStation()
     cout << left; // Left-align the output
     cout << setw(20) << "Instruction ID" << setw(30) << "Name" << setw(20) << "Issue" << setw(20) << "Start Execution" <<
         setw(20) << "End Execution" << setw(20) << "Write Result" << endl;
+	int calculateAddress = 0;
+
 
     cout << "\n";
     for (int i = 0; i < scheduleStation.size(); i++)
     {
+        if ((scheduleStation[i].op == "LOAD" || scheduleStation[i].op == "STORE")  && scheduleStation[i].executionCycleStart !=-1)
+            calculateAddress = 1;
+		else calculateAddress = 0;
         cout << setw(20) << scheduleStation[i].instructionId
             << setw(30) << scheduleStation[i].name
             << setw(20) << scheduleStation[i].issuingCycle
-            << setw(20) << scheduleStation[i].executionCycleStart
+            << setw(20) << scheduleStation[i].executionCycleStart + calculateAddress
             << setw(20) << scheduleStation[i].executionCycleEnd
             << setw(20) << scheduleStation[i].writingCycle << endl;
     }
@@ -527,7 +532,7 @@ void printVector(vector<string>& v)
 }
 
 void print() {
-    cout << "\n\n----------------------------------------------------------" << "Cycle " << cycle - 1
+    cout << "\n\n----------------------------------------------------------" << "Cycle " << cycle
         << "----------------------------------------------------------" << endl;
     cout << endl;
     printScheduleStation();
@@ -583,7 +588,7 @@ void read_memory_file(string mem_file) {
 }
 
 void taskManager() {
-    read_instructions_file("instructions4.txt");
+    read_instructions_file("instructions2.txt");
     read_memory_file("memory.txt");
     fillingInstructions();
     fillingReservationStation();
@@ -594,7 +599,7 @@ void taskManager() {
         issue();
         execute();
         writeResult();
-        //print();
+        print();
         cycle++;
     }
     cout << "---------------------------------------------------------------------------------------------------------------------------" << endl;
@@ -604,56 +609,6 @@ void taskManager() {
         cout << "R" << i << ": " << registers[i] << "\n";
     }
     cout << "Memory[40]: " << memory[40];
-    /* runOneStep();
-     print();
-     runOneStep();
-     print();
-     runOneStep();
-     print();
-     runOneStep();
-     print();
-     runOneStep();
-     print();
-     runOneStep();
-     print();
-     runOneStep();
-     print();
-     runOneStep();
-     print();
-     runOneStep();
-     print();
-     runOneStep();
-     print();
-     runOneStep();
-     print();
-     runOneStep();
-     print();
-     runOneStep();
-     print();
-     runOneStep();
-     print();
-     runOneStep();
-     print();
-     runOneStep();
-     print();
-     runOneStep();
-     print();
-     runOneStep();
-     print();
-     runOneStep();
-     print();
-     runOneStep();
-     print();
-     runOneStep();*/
-
-     /*while (writng_counter != scheduleStation.size())
-     {
-         issue();
-         execute();
-         writeResult();
-         cycle++;
-     }*/
-
 }
 
 int main() {

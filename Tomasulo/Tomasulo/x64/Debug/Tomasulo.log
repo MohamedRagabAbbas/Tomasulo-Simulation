@@ -1,2 +1,20 @@
 ﻿  Tomasulo.cpp
+D:\Projects\Tomasulo-Simulation\Tomasulo\Tomasulo\Instruction.h(29,19): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+  (compiling source file 'Tomasulo.cpp')
+  
+D:\Projects\Tomasulo-Simulation\Tomasulo\Tomasulo\Instruction.h(57,19): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+  (compiling source file 'Tomasulo.cpp')
+  
+D:\Projects\Tomasulo-Simulation\Tomasulo\Tomasulo\Instruction.h(65,21): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+  (compiling source file 'Tomasulo.cpp')
+  
+D:\Projects\Tomasulo-Simulation\Tomasulo\Tomasulo\Instruction.h(73,19): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+  (compiling source file 'Tomasulo.cpp')
+  
+D:\Projects\Tomasulo-Simulation\Tomasulo\Tomasulo\Instruction.h(91,19): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+  (compiling source file 'Tomasulo.cpp')
+  
+D:\Projects\Tomasulo-Simulation\Tomasulo\Tomasulo\Instruction.h(111,19): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+  (compiling source file 'Tomasulo.cpp')
+  
   Tomasulo.vcxproj -> D:\Projects\Tomasulo-Simulation\Tomasulo\x64\Debug\Tomasulo.exe
