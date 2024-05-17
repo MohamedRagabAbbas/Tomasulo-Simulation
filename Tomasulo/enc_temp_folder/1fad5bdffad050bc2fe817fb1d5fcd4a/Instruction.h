@@ -128,7 +128,6 @@ public:
     }
 
     void parse_CALL_inst(const string& inst) {
-
     }
 
     void parse_RET_inst(const string& inst) {

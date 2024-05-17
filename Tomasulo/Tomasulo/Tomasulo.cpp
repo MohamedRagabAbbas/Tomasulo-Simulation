@@ -472,8 +472,8 @@ void runOneStep()
 void printReservationStation()
 {
     cout << left; // Left-align the output
-    cout << setw(12) << "Id" << setw(18) << "Instruction ID" << setw(18) << "Name" << setw(12) << "Busy" << setw(12) << "Op"
-        << setw(12) << "Vj" << setw(12) << "Vk" << setw(12) << "Qj" << setw(12) << "Qk" << setw(12) << "A" << endl;
+    cout << setw(12) << "Id" << setw(18) << "Instruction ID" << setw(18) << "Name" << setw(11) << "Busy" << setw(11) << "Op"
+        << setw(11) << "Vj" << setw(12) << "Vk" << setw(11) << "Qj" << setw(11) << "Qk" << setw(11) << "A" << endl;
 
     cout << "\n";
     for (int i = 0; i < NReservationStations; i++)
@@ -481,13 +481,13 @@ void printReservationStation()
         cout << setw(12) << reservationStation[i].id
             << setw(18) << reservationStation[i].instructionId
             << setw(18) << reservationStation[i].name
-            << setw(12) << reservationStation[i].busy
-            << setw(12) << reservationStation[i].op
-            << setw(12) << reservationStation[i].vj
-            << setw(12) << reservationStation[i].vk
-            << setw(12) << reservationStation[i].qj
-            << setw(12) << reservationStation[i].qk
-            << setw(12) << reservationStation[i].A << endl;
+            << setw(11) << reservationStation[i].busy
+            << setw(11) << reservationStation[i].op
+            << setw(11) << reservationStation[i].vj
+            << setw(11) << reservationStation[i].vk
+            << setw(11) << reservationStation[i].qj
+            << setw(11) << reservationStation[i].qk
+            << setw(11) << reservationStation[i].A << endl;
     }
 }
 
@@ -588,7 +588,7 @@ void read_memory_file(string mem_file) {
 }
 
 void taskManager() {
-    read_instructions_file("instructions2.txt");
+    read_instructions_file("instructions3.txt");
     read_memory_file("memory.txt");
     fillingInstructions();
     fillingReservationStation();
