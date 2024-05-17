@@ -103,10 +103,10 @@ public:
         index += 2;
         while (inst[index] == ' ' || inst[index] == ',') index++;
 
-        int stop = index;
-        while (inst[stop + 1] != ' ') stop++;
+        // int stop = index;
+        // while (inst[stop + 1] != ' ') stop++;
 
-        imm = stoi(inst.substr(index, stop - index + 1));
+        imm = stoi(inst.substr(index, inst.size() - index));
 
         //cout << "rA: " << rA << " rB: " << rB << " imm: " << imm << "\n";
     }
@@ -125,12 +125,12 @@ public:
         index += 2;
         while (inst[index] == ' ' || inst[index] == ',') index++;
 
-        int stop = index;
-        while (inst[stop + 1] != ' ') stop++;
+        // int stop = index;
+        // while (inst[stop + 1] != ' ') stop++;
 
-        imm = stoi(inst.substr(index, stop - index + 1));
+        imm = stoi(inst.substr(index, inst.size() - index));
 
-        //cout << "rA: " << rA << " rB: " << rB << " imm: " << imm << "\n";
+        cout << "rA: " << rA << " rB: " << rB << " imm: " << imm << "\n";
     }
 
     void parse_CALL_inst(const string& inst) {
@@ -138,10 +138,11 @@ public:
         op = inst.substr(0, index);
 
         while (inst[index] == ' ') index++;
-        int stop = index;
-        while (inst[stop + 1] != ' ') stop++;
 
-        imm = stoi(inst.substr(index, stop - index + 1));
+        // int stop = index;
+        // while (inst[stop + 1] != ' ') stop++;
+
+        imm = stoi(inst.substr(index, inst.size() - index));
 
         //cout << "imm: " << imm << "\n";
     }

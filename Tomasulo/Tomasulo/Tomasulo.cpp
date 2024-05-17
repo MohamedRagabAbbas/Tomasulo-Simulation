@@ -583,7 +583,7 @@ void read_memory_file(string mem_file) {
 }
 
 void taskManager() {
-    read_instructions_file("instructions4.txt");
+    read_instructions_file("instructions2.txt");
     read_memory_file("memory.txt");
     fillingInstructions();
     fillingReservationStation();
