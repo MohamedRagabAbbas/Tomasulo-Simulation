@@ -588,7 +588,11 @@ void read_memory_file(string mem_file) {
 }
 
 void taskManager() {
+<<<<<<< HEAD
     read_instructions_file("instructions3.txt");
+=======
+    read_instructions_file("instructions2.txt");
+>>>>>>> main
     read_memory_file("memory.txt");
     fillingInstructions();
     fillingReservationStation();
