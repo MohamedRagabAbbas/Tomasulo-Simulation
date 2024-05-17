@@ -1,6 +1,2 @@
 LOAD r2, 8(r0)
-LOAD r3, 12(r0)
-ADDI r4, r2, 2
-ADDI r5, r3, 3
-ADD r6, r4, r5
-MUL r7, r4, r5
+STORE r2, 30(r2)
