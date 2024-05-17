@@ -100,16 +100,19 @@ vector<RegisterStatus> registerStatus = fillingRegisterStatus();
 
 
 // take image form the reservation station and status register and wait to know whether the branch is taken or not
+vector<Instruction> scheduleStation_image;
 vector<ReservationStation> reservationStation_image;
 vector<RegisterStatus> registerStatus_image;
 
 void takeImage() {
+	scheduleStation_image = scheduleStation;
     reservationStation_image = reservationStation;
     registerStatus_image = registerStatus;
 }
 
 // restore the reservation station and status register
 void restoreImage() {
+	scheduleStation = scheduleStation_image;
     reservationStation = reservationStation_image;
     registerStatus = registerStatus_image;
 }
@@ -139,7 +142,11 @@ int stop = NReservationStations;
 //----------------------------------------------------------------------------ISSUE----------------------------------------------------------------------------
 int isCall = 0;
 // if the instruction call is issued
+
 int isBEQ = 0;
+vector<int> istructionsId;
+vector<int> reservationStationId;
+
 
 void issue()
 {
@@ -174,6 +181,11 @@ void issue()
 				isBEQ = 1;
 				stop = i + 1;
 			}
+            if (isBEQ && scheduleStation[i].op != "BEQ")
+            {
+				istructionsId.push_back(scheduleStation[i].instructionId);
+				reservationStationId.push_back(isBusy_var.first);
+            }
             PC++;
             reservationStation[isBusy_var.first].instructionId = scheduleStation[i].instructionId; // mark RS is responsible for which instruction
             reservationStation[isBusy_var.first].busy = true; // mark RS as busy
@@ -336,30 +348,31 @@ void execute()
     }
 }
 
+
 //flush the two instructions after the call
-void flush(int call_id)
+void flush()
 {
-    for (int i = call_id; i < call_id + 2; i++)
+    for (int i = 0; i < istructionsId.size(); i++)
     {
-        scheduleStation[i].issuingCycle = -1;
-        scheduleStation[i].executionCycleStart = -1;
-        scheduleStation[i].executionCycleEnd = -1;
-        scheduleStation[i].writingCycle = -1;
-        registerStatus[scheduleStation[i].rA].q = "";
-        for (int j = 0; j < NReservationStations; j++) {
-            if (reservationStation[j].instructionId == scheduleStation[i].instructionId)
+		scheduleStation[istructionsId[i]].issuingCycle = -1;
+        for (int j = 0; j < NRegisters; j++)
+        {
+			if (registerStatus[j].q == reservationStation[reservationStationId[i]].name)
             {
-                reservationStation[j].busy = false;
-                reservationStation[j].op = "";
-                reservationStation[j].vj = -1;
-                reservationStation[j].vk = -1;
-                reservationStation[j].qj = -1;
-                reservationStation[j].qk = -1;
-                reservationStation[j].A = -1;
-            }
+				registerStatus[j].q = "";
+			}
         }
     }
-
+	for (int i = 0; i < reservationStationId.size(); i++)
+	{
+		reservationStation[reservationStationId[i]].busy = false;
+		reservationStation[reservationStationId[i]].op = "";
+		reservationStation[reservationStationId[i]].vj = -1;
+		reservationStation[reservationStationId[i]].vk = -1;
+		reservationStation[reservationStationId[i]].qj = -1;
+		reservationStation[reservationStationId[i]].qk = -1;
+		reservationStation[reservationStationId[i]].A = -1;
+	}
 }
 
 //----------------------------------------------------------------------------WRITE----------------------------------------------------------------------------
@@ -376,14 +389,6 @@ int getReservationStationIndex(int instructionId)
 }
 void writeResult()
 {
-    // if call.write == cycle + 2 flush the two instructions after the call
-    for (int b = 0; b < scheduleStation.size(); b++)
-    {
-        if (scheduleStation[b].op == "CALL" && scheduleStation[b].writingCycle != -1 && scheduleStation[b].writingCycle + 1 == cycle)
-        {
-            flush(b + 1);
-        }
-    }
     for (int i = 0; i < NReservationStations; i++)
     {
         if (reservationStation[i].busy)
@@ -448,13 +453,18 @@ void writeResult()
                         if (dest != 0) registers[dest] = reservationStation[i].result;
                     }
                     else if (op == "BEQ") {
-                        if (scheduleStation[instruction_index].rA == scheduleStation[instruction_index].rB)
+                        if (registers[scheduleStation[instruction_index].rB] == registers[scheduleStation[instruction_index].rC])
                         {
-
+                            isBEQ = 0;
+							stop = scheduleStation.size();
+                            flush();
+							PC = scheduleStation[instruction_index].imm + instruction_index + 1;
                         } 
                         else
                         {
                             stop = scheduleStation.size();
+							isBEQ = 0;
+
                         }
 					}
 					else if (op == "CALL") {
