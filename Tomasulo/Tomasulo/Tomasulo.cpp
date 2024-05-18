@@ -581,6 +581,7 @@ void writeResult2()
                     flush();
                     PC = scheduleStation[m].imm + m + 1;
                     isBranchTaken_vr = 1;
+
 					numberOfJumps++;
                     lastWroteInstruction = PC - 1;
                 }
@@ -614,7 +615,11 @@ void writeResult2()
             scheduleStation[m].writingCycle = cycle;
 			isWritten_in_functionsStack[numberOfJumps][m] = true;
 			lastWroteInstruction = m;
-			if (scheduleStation[m].op == "BEQ" && registers[scheduleStation[m].rB] == registers[scheduleStation[m].rC]) lastWroteInstruction = PC - 1;
+            if (scheduleStation[m].op == "BEQ" && registers[scheduleStation[m].rB] == registers[scheduleStation[m].rC])
+            {
+                lastWroteInstruction = PC - 1;
+                isWritten_in_functionsStack[numberOfJumps][m] = false;
+            }
             reservationStation[getReservationStationIndex(m)].busy = false;
             reservationStation[getReservationStationIndex(m)].op = "";
             reservationStation[getReservationStationIndex(m)].vj = -1;
