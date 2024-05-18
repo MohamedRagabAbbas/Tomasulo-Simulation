@@ -25,6 +25,6 @@ D:\Projects\Tomasulo-Simulation\Tomasulo\Tomasulo\Instruction.h(151,19): warning
   
 D:\Projects\Tomasulo-Simulation\Tomasulo\Tomasulo\Tomasulo.cpp(455,56): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
 D:\Projects\Tomasulo-Simulation\Tomasulo\Tomasulo\Tomasulo.cpp(462,56): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
-D:\Projects\Tomasulo-Simulation\Tomasulo\Tomasulo\Tomasulo.cpp(567,48): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
-D:\Projects\Tomasulo-Simulation\Tomasulo\Tomasulo\Tomasulo.cpp(576,48): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+D:\Projects\Tomasulo-Simulation\Tomasulo\Tomasulo\Tomasulo.cpp(580,48): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+D:\Projects\Tomasulo-Simulation\Tomasulo\Tomasulo\Tomasulo.cpp(589,48): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
   Tomasulo.vcxproj -> D:\Projects\Tomasulo-Simulation\Tomasulo\x64\Debug\Tomasulo.exe

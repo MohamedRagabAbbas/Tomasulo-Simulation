@@ -532,12 +532,25 @@ void writeResult()
 
 
 int lastWroteInstruction = -1;
+vector<vector<bool>> isWritten_in_functionsStack;
+void filling_isWritten_in_functionsStack()
+{
+    for (int i = 0; i < scheduleStation.size(); i++)
+    {
+        vector<bool> v;
+        for (int j = 0; j < scheduleStation.size(); j++) {
+            v.push_back(false);
+        }
+        isWritten_in_functionsStack.push_back(v);
+    }
+}
 void writeResult2()
 {
-    for (int m = lastWroteInstruction+1; m < scheduleStation.size(); m++)
+    for (int m = 0; m < scheduleStation.size(); m++)
     {
         if (scheduleStation[m].executionCycleEnd + 1 <= cycle && scheduleStation[m].executionCycleEnd != -1 && 
-            isExecuted_in_functionsStack[numberOfJumps][m] == true) // if the instruction is executed
+            isExecuted_in_functionsStack[numberOfJumps][m] == true &&
+            isWritten_in_functionsStack[numberOfJumps][m] == false) // if the instruction is executed
         {
             if (m == scheduleStation.size() - 1)
                 isLastInstruction_v = 1;
@@ -599,6 +612,7 @@ void writeResult2()
 
             // I moved this a bit downwards as I needed the A for the store (nvm i don't need now but i left it here)
             scheduleStation[m].writingCycle = cycle;
+			isWritten_in_functionsStack[numberOfJumps][m] = true;
 			lastWroteInstruction = m;
 			if (scheduleStation[m].op == "BEQ" && registers[scheduleStation[m].rB] == registers[scheduleStation[m].rC]) lastWroteInstruction = PC - 1;
             reservationStation[getReservationStationIndex(m)].busy = false;
@@ -789,6 +803,7 @@ void taskManager() {
     fillingReservationStation();
     fillingMapper();
     filling_isExecuted_in_functionsStack();
+    filling_isWritten_in_functionsStack();
     computeNumberOfInstructionsBtwCallAndRet();
 
     //writng_counter != scheduleStation.size()
