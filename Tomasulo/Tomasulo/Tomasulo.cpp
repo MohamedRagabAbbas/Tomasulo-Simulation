@@ -151,9 +151,8 @@ vector<int> reservationStationId;
 
 void issue()
 {
-    if (isCall > 0)
+    if (isCall != 0)
     {
-        isCall--;
         return;
     }
     if (PC >= scheduleStation.size()) {
@@ -164,14 +163,15 @@ void issue()
     {
         pair<int, bool> isBusy_var = isBusy(mapper[scheduleStation[i].op][j]);
 		int hasDestination = 1; 
-        if (scheduleStation[i].op == "CALL" || scheduleStation[i].op == "RET", scheduleStation[i].op == "BEQ") hasDestination = 0;
+        if (scheduleStation[i].op == "CALL" || scheduleStation[i].op == "RET" || scheduleStation[i].op == "BEQ") 
+            hasDestination = 0;
         if (!hasDestination || (!isBusy_var.second && registerStatus[scheduleStation[i].rA].q == "")) // if the reservation station is not busy
         {
             //scheduleStation[i].issuingCycle_set(cycle); // set the issuing cycle
             scheduleStation[i].issuingCycle = cycle;
             if (scheduleStation[i].op == "CALL")
             {
-                isCall = 2;
+                isCall = 1;
             }
             if (scheduleStation[i].op == "BEQ")
             {
@@ -260,6 +260,18 @@ void filling_isExecuted_in_functionsStack()
         isExecuted_in_functionsStack.push_back(v);
     }
 }
+vector<vector<bool>> isWritten_in_functionsStack;
+void filling_isWritten_in_functionsStack()
+{
+    for (int i = 0; i < scheduleStation.size(); i++)
+    {
+        vector<bool> v;
+        for (int j = 0; j < scheduleStation.size(); j++) {
+            v.push_back(false);
+        }
+        isWritten_in_functionsStack.push_back(v);
+    }
+}
 
 
 // check if the branch is taken or not
@@ -322,6 +334,13 @@ void execute()
             if (isExecuted_in_functionsStack[numberOfJumps][reservationStation[i].instructionId] == false &&
                 scheduleStation[reservationStation[i].instructionId].issuingCycle != cycle)
             {
+                if (numberOfJumps > 0)
+                {
+					if(isExecuted_in_functionsStack[numberOfJumps - 1][reservationStation[i].instructionId] == true &&
+						isWritten_in_functionsStack[numberOfJumps - 1][reservationStation[i].instructionId] == false)
+						continue;
+
+                }
                 if (reservationStation[i].qj == -1 && reservationStation[i].qk == -1) // if the sources are ready
                 {
                     scheduleStation[reservationStation[i].instructionId].executionCycleStart = cycle;
@@ -532,25 +551,16 @@ void writeResult()
 
 
 int lastWroteInstruction = -1;
-vector<vector<bool>> isWritten_in_functionsStack;
-void filling_isWritten_in_functionsStack()
-{
-    for (int i = 0; i < scheduleStation.size(); i++)
-    {
-        vector<bool> v;
-        for (int j = 0; j < scheduleStation.size(); j++) {
-            v.push_back(false);
-        }
-        isWritten_in_functionsStack.push_back(v);
-    }
-}
+
 void writeResult2()
 {
     for (int m = 0; m < scheduleStation.size(); m++)
     {
-        if (scheduleStation[m].executionCycleEnd + 1 <= cycle && scheduleStation[m].executionCycleEnd != -1 && 
+        if ((scheduleStation[m].executionCycleEnd + 1 <= cycle && scheduleStation[m].executionCycleEnd != -1 && 
             isExecuted_in_functionsStack[numberOfJumps][m] == true &&
-            isWritten_in_functionsStack[numberOfJumps][m] == false) // if the instruction is executed
+            isWritten_in_functionsStack[numberOfJumps][m] == false) 
+            || (numberOfJumps > 0 && isExecuted_in_functionsStack[numberOfJumps-1][m] 
+                && isWritten_in_functionsStack[numberOfJumps - 1][m] == false)) 
         {
             if (m == scheduleStation.size() - 1)
                 isLastInstruction_v = 1;
@@ -562,10 +572,11 @@ void writeResult2()
             // if it is call set registers[1] to the return address which is the next instruction ctyle + 1
             if (scheduleStation[m].op == "CALL")
             {
-                registers[1] = cycle - 2;
+                registers[1] = m+1;
                 isJump = true;
                 jumpTo = scheduleStation[m].imm;
                 PC = jumpTo + m + 1;
+                isCall = 0;
             }
             else if (scheduleStation[m].op == "RET") {
                 PC = registers[1];
@@ -614,6 +625,13 @@ void writeResult2()
             // I moved this a bit downwards as I needed the A for the store (nvm i don't need now but i left it here)
             scheduleStation[m].writingCycle = cycle;
 			isWritten_in_functionsStack[numberOfJumps][m] = true;
+            if (numberOfJumps > 0 && isExecuted_in_functionsStack[numberOfJumps - 1][m]
+                && isWritten_in_functionsStack[numberOfJumps - 1][m] == false)
+            {
+                isWritten_in_functionsStack[numberOfJumps][m] = false;
+                isWritten_in_functionsStack[numberOfJumps-1][m] = true;
+                scheduleStation[m].writingCycle = cycle + 1;
+            }
 			lastWroteInstruction = m;
             if (scheduleStation[m].op == "BEQ" && registers[scheduleStation[m].rB] == registers[scheduleStation[m].rC])
             {
@@ -800,10 +818,27 @@ void read_memory_file(string mem_file) {
         memory[address] = value;
     }
 }
-
+bool isAllTablesEmpty() {
+	bool reservationStationEmpty = true;
+    bool registerStatusEmpty = true;
+	for (int i = 0; i < NReservationStations; i++) {
+        if (reservationStation[i].busy == true) {
+			reservationStationEmpty = false;
+			break;
+		}
+	}
+	for (int i = 0; i < NRegisters; i++) {
+		if (registerStatus[i].q != "") {
+			registerStatusEmpty = false;
+			break;
+		}
+	}
+	
+	return (reservationStationEmpty && registerStatusEmpty);
+}
 void taskManager() {
 
-    read_instructions_file("instructions2.txt");
+    read_instructions_file("instructions3.txt");
     read_memory_file("memory.txt");
     fillingInstructions();
     fillingReservationStation();
@@ -818,12 +853,14 @@ void taskManager() {
         writeResult2();
         print();
         cycle++;
-        if (writng_counter == scheduleStation.size() && !isJump)
+        if(isAllTablesEmpty() == true && writng_counter == scheduleStation.size())
+			break;
+        /*if (writng_counter == scheduleStation.size() && !isJump)
             break;
         if (writng_counter == scheduleStation.size() && isLastInstruction_v)
             break;
         if (isBranchTaken_vr && isLastInstruction_v)
-            break;
+            break;*/
     }
     cout << "---------------------------------------------------------------------------------------------------------------------------" << endl;
     printScheduleStation();
