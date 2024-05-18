@@ -754,7 +754,6 @@ void print() {
 //--------------------------------------------------------------------------READ FILES--------------------------------------------------------------------------
 
 
-
 void read_instructions_file(const string& filename) {
     fstream file(filename);
     if (!file.is_open()) {
