@@ -1,10 +1,10 @@
-LOAD r2, 8(r0)      
-STORE r2, 30(r2)
-CALL 4    
-LOAD r3, 2(r2)      
-ADD r4, r2, r3      
-MUL r5, r2, r3  
-NAND r6, r2, r3
-ADDI r7, r5, 11
-BEQ r0, r0, 44
-RET
+ADDI r1, r0, 1
+ADDI r2, r0, 5
+ADDI r3, r0, 0
+ADDI r5, r0, 0
+ADDI r4, r0, 5
+ADDI r3, r3, 4
+ADDI r5, r5, 1
+ADDI r4, r4, -1
+BEQ r4, r3, -5
+ADDI r6, r0, 6

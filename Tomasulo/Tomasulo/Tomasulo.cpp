@@ -592,8 +592,6 @@ void writeResult2()
                     flush();
                     PC = scheduleStation[m].imm + m + 1;
                     isBranchTaken_vr = 1;
-
-					numberOfJumps++;
                     lastWroteInstruction = PC - 1;
                 }
                 else
@@ -636,7 +634,13 @@ void writeResult2()
             if (scheduleStation[m].op == "BEQ" && registers[scheduleStation[m].rB] == registers[scheduleStation[m].rC])
             {
                 lastWroteInstruction = PC - 1;
-                isWritten_in_functionsStack[numberOfJumps][m] = false;
+                if(numberOfJumps>0)
+                    isWritten_in_functionsStack[numberOfJumps][m] = false;
+                else
+                {
+					isWritten_in_functionsStack[numberOfJumps][m] = true;
+                }
+                numberOfJumps++;
             }
             reservationStation[getReservationStationIndex(m)].busy = false;
             reservationStation[getReservationStationIndex(m)].op = "";
@@ -838,7 +842,7 @@ bool isAllTablesEmpty() {
 }
 void taskManager() {
 
-    read_instructions_file("instructions1.txt");
+    read_instructions_file("instructions5.txt");
     read_memory_file("memory.txt");
     fillingInstructions();
     fillingReservationStation();
@@ -853,9 +857,8 @@ void taskManager() {
         writeResult2();
         print();
         cycle++;
-        if(isAllTablesEmpty() == true && writng_counter == scheduleStation.size())
+        if(isAllTablesEmpty() == true && (writng_counter == scheduleStation.size() || isBranchTaken_vr && isLastInstruction_v))
 			break;
-
         /*if (writng_counter == scheduleStation.size() && !isJump)
             break;
         if (writng_counter == scheduleStation.size() && isLastInstruction_v)
