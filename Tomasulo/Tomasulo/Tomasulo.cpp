@@ -803,7 +803,7 @@ void read_memory_file(string mem_file) {
 
 void taskManager() {
 
-    read_instructions_file("instructions6.txt");
+    read_instructions_file("instructions1.txt");
     read_memory_file("memory.txt");
     fillingInstructions();
     fillingReservationStation();
@@ -811,7 +811,6 @@ void taskManager() {
     filling_isExecuted_in_functionsStack();
     filling_isWritten_in_functionsStack();
     computeNumberOfInstructionsBtwCallAndRet();
-
     //writng_counter != scheduleStation.size()
     while (true) {
         issue();
