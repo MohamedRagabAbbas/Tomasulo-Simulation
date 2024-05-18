@@ -34,8 +34,7 @@
               "ToolTip": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.39.33519\\include\\vector",
               "ViewState": "AQIAAFIHAAAAAAAAAAAmwGQHAAAAAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
-              "WhenOpened": "2024-05-17T17:23:40.429Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-05-17T17:23:40.429Z"
             },
             {
               "$type": "Document",
@@ -45,8 +44,7 @@
               "ToolTip": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.39.33519\\include\\xstring",
               "ViewState": "AQIAANMPAAAAAAAAAAAmwOUPAAAAAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
-              "WhenOpened": "2024-05-17T16:57:11.963Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-05-17T16:57:11.963Z"
             },
             {
               "$type": "Document",
@@ -58,8 +56,7 @@
               "RelativeToolTip": "Tomasulo\\Instruction.h",
               "ViewState": "AQIAAGYAAAAAAAAAAAAAAHkAAAAMAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2024-05-17T16:50:31.888Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-05-17T16:50:31.888Z"
             },
             {
               "$type": "Document",
@@ -67,9 +64,9 @@
               "Title": "Tomasulo.cpp",
               "DocumentMoniker": "D:\\Projects\\Tomasulo-Simulation\\Tomasulo\\Tomasulo\\Tomasulo.cpp",
               "RelativeDocumentMoniker": "Tomasulo\\Tomasulo.cpp",
-              "ToolTip": "D:\\Projects\\Tomasulo-Simulation\\Tomasulo\\Tomasulo\\Tomasulo.cpp",
-              "RelativeToolTip": "Tomasulo\\Tomasulo.cpp",
-              "ViewState": "AQIAAJkCAAAAAAAAAAAAALACAAAJAAAA",
+              "ToolTip": "D:\\Projects\\Tomasulo-Simulation\\Tomasulo\\Tomasulo\\Tomasulo.cpp*",
+              "RelativeToolTip": "Tomasulo\\Tomasulo.cpp*",
+              "ViewState": "AQIAAEECAAAAAAAAAAAAAEQBAAAWAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2024-05-15T23:47:03.295Z",
               "EditorCaption": ""
