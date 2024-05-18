@@ -838,7 +838,7 @@ bool isAllTablesEmpty() {
 }
 void taskManager() {
 
-    read_instructions_file("instructions3.txt");
+    read_instructions_file("instructions1.txt");
     read_memory_file("memory.txt");
     fillingInstructions();
     fillingReservationStation();
@@ -855,6 +855,7 @@ void taskManager() {
         cycle++;
         if(isAllTablesEmpty() == true && writng_counter == scheduleStation.size())
 			break;
+
         /*if (writng_counter == scheduleStation.size() && !isJump)
             break;
         if (writng_counter == scheduleStation.size() && isLastInstruction_v)
