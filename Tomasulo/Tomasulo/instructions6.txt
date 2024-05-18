@@ -1,4 +1,0 @@
-ADDI r2, r0, 10
-ADDI r3, r3, 5
-LOAD r4, 0(r3)
-BEQ  r3, r4, -3
