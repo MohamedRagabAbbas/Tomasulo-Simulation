@@ -360,7 +360,7 @@ void executeInstLogic(ReservationStation& station, string op) {
     }
 }
 
-
+int wait = 0;
 void execute()
 {
 	int isContinue = 0;
@@ -389,6 +389,7 @@ void execute()
                             if (addresses[j] == reservationStation[i].A)
                             {
 								isContinue = 1;
+                                wait = 2;
 								break;
 							}
 						}
@@ -397,15 +398,18 @@ void execute()
 					{
                         continue;   
 					}
-                    if (scheduleStation[reservationStation[i].instructionId].op == "LOAD" || scheduleStation[reservationStation[i].instructionId].op == "STORE")
-                    {
-                        addresses.push_back(scheduleStation[reservationStation[i].instructionId].imm);
-                    }
-                    scheduleStation[reservationStation[i].instructionId].executionCycleStart = cycle;
-                    scheduleStation[reservationStation[i].instructionId].executionCycleEnd = cycle + numberOfcycles[reservationStation[i].op] - 1;
+
+                    scheduleStation[reservationStation[i].instructionId].executionCycleStart = cycle - wait;
+                    scheduleStation[reservationStation[i].instructionId].executionCycleEnd = cycle + numberOfcycles[reservationStation[i].op] - 1 - wait;
 
                     isExecuted_in_functionsStack[numberOfJumps][reservationStation[i].instructionId] = true;
                     executeInstLogic(reservationStation[i], scheduleStation[reservationStation[i].instructionId].op);
+
+                    if (scheduleStation[reservationStation[i].instructionId].op == "LOAD" || scheduleStation[reservationStation[i].instructionId].op == "STORE")
+                    {
+                        addresses.push_back(scheduleStation[reservationStation[i].instructionId].imm);
+						wait = 0;
+                    }
                     //map<int, bool> isExecuted = isExecuted_in_functionsStack[reservationStation[i].instructionId];
                     //return;
                 }
@@ -921,7 +925,7 @@ bool isAllTablesEmpty() {
 }
 void taskManager() {
 
-    read_instructions_file("instructions6.txt");
+    read_instructions_file("instructions1.txt");
     read_memory_file("memory.txt");
     fillingInstructions();
     fillingReservationStation();
@@ -935,12 +939,12 @@ void taskManager() {
         issue();
         execute();
         writeResult2();
-        print();
+        //print();
         cycle++;
-        cout << "---------------------------------------------------------------------------------------------------------------------------" << endl;
-        for (int i = 0; i < 8; i++) {
+       // cout << "---------------------------------------------------------------------------------------------------------------------------" << endl;
+        /*for (int i = 0; i < 8; i++) {
             cout << "R" << i << ": " << registers[i] << "\n";
-        }
+        }*/
         if(isAllTablesEmpty() == true && (writng_counter == scheduleStation.size() || isBranchTaken_vr && isLastInstruction_v))
 			break;
         /*if (writng_counter == scheduleStation.size() && !isJump)
