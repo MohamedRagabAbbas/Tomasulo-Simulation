@@ -15,6 +15,8 @@ int numberOfJumps = 0; // number of jumps
 int cycle = 1;
 bool isFinished = false;
 int writng_counter = 0;
+int numberOfBranches = 0;
+int flushes = 0;
 
 struct ReservationStation {
     string name;
@@ -175,14 +177,14 @@ void filling_isWritten_in_functionsStack()
 vector<vector<bool>> isIssued_in_functionsStack;
 void filling_isIssued_in_functionsStack()
 {
-	for (int i = 0; i < scheduleStation.size(); i++)
-	{
-		vector<bool> v;
-		for (int j = 0; j < scheduleStation.size(); j++) {
-			v.push_back(false);
-		}
-		isIssued_in_functionsStack.push_back(v);
-	}
+    for (int i = 0; i < scheduleStation.size(); i++)
+    {
+        vector<bool> v;
+        for (int j = 0; j < scheduleStation.size(); j++) {
+            v.push_back(false);
+        }
+        isIssued_in_functionsStack.push_back(v);
+    }
 }
 
 
@@ -208,23 +210,23 @@ void issue()
         return;
     }
     int i = PC;
-	for (i = 0 ; i < scheduleStation.size(); i++)
+    for (i = 0; i < scheduleStation.size(); i++)
     {
-		if (isIssued_in_functionsStack[numberOfJumps][i])
-		{
-			continue;
-		}
+        if (isIssued_in_functionsStack[numberOfJumps][i])
+        {
+            continue;
+        }
         for (int j = 0; j < mapper[scheduleStation[i].op].size(); j++)              // iterate over all RSs for current instruction type
         {
             pair<int, bool> isBusy_var = isBusy(mapper[scheduleStation[i].op][j]);
-		    int hasDestination = 1; 
-            if (scheduleStation[i].op == "CALL" || scheduleStation[i].op == "RET" || scheduleStation[i].op == "BEQ") 
+            int hasDestination = 1;
+            if (scheduleStation[i].op == "CALL" || scheduleStation[i].op == "RET" || scheduleStation[i].op == "BEQ")
                 hasDestination = 0;
             if (!hasDestination || (!isBusy_var.second && registerStatus[scheduleStation[i].rA].q == "")) // if the reservation station is not busy
             {
                 //scheduleStation[i].issuingCycle_set(cycle); // set the issuing cycle
                 scheduleStation[i].issuingCycle = cycle;
-				isIssued_in_functionsStack[numberOfJumps][i] = true;
+                isIssued_in_functionsStack[numberOfJumps][i] = true;
                 // if the instruction is load or store, store the address in the addresses vector
                 //if (scheduleStation[i].op == "LOAD" || scheduleStation[i].op == "STORE")
                 //{
@@ -236,6 +238,7 @@ void issue()
                 }
                 if (scheduleStation[i].op == "BEQ")
                 {
+                    numberOfBranches++;
                     isBEQ = 1;
                     stop = i + 1;
                 }
@@ -327,6 +330,12 @@ bool isBranchTaken(int instructionId)
 }
 
 //----------------------------------------------------------------------------EXECUTE----------------------------------------------------------------------------
+int get16Bits(int n) {
+    for (int i = 16; i <= 31; i++) {
+        n &= ~(1 << i);
+    }
+    return n;
+}
 
 void executeInstLogic(ReservationStation& station, string op) {
 
@@ -353,17 +362,30 @@ void executeInstLogic(ReservationStation& station, string op) {
         station.result = station.A + station.vj;
     }
     else if (op == "NAND") {
-        station.result = ~(station.vk & station.vj);
+        int farthest = 0;
+        for (int i = 16; i >= 0; i--) {
+            if (((1 << i) & station.vj) || ((i << i) & station.vk)) {
+                farthest = i;
+                break;
+            }
+        }
+        int res = abs(station.vj) & abs(station.vk);
+        for (int i = 0; i <= farthest; i++) {
+            res ^= (1 << i);
+        }
+        station.result = res;
     }
     else if (op == "MUL") {
-        station.result = station.vj * station.vk;
+        int mul = station.vj * station.vk;
+        station.result = get16Bits(mul);
     }
 }
 
-int wait = 0;
+
+int wait1 = 0;
 void execute()
 {
-	int isContinue = 0;
+    int isContinue = 0;
     for (int i = 0; i < reservationStation.size(); i++)
     {
         if (reservationStation[i].busy && reservationStation[i].instructionId < stop)
@@ -374,9 +396,9 @@ void execute()
             {
                 if (numberOfJumps > 0)
                 {
-					if(isExecuted_in_functionsStack[numberOfJumps - 1][reservationStation[i].instructionId] == true &&
-						isWritten_in_functionsStack[numberOfJumps - 1][reservationStation[i].instructionId] == false)
-						continue;
+                    if (isExecuted_in_functionsStack[numberOfJumps - 1][reservationStation[i].instructionId] == true &&
+                        isWritten_in_functionsStack[numberOfJumps - 1][reservationStation[i].instructionId] == false)
+                        continue;
 
                 }
                 if (reservationStation[i].qj == -1 && reservationStation[i].qk == -1) // if the sources are ready
@@ -384,23 +406,23 @@ void execute()
                     // if the instruction is load or store and it has address dependency, wait for the address to be ready
                     if ((scheduleStation[reservationStation[i].instructionId].op == "LOAD" || scheduleStation[reservationStation[i].instructionId].op == "STORE"))
                     {
-						for (int j = 0; j < addresses.size(); j++)
+                        for (int j = 0; j < addresses.size(); j++)
                         {
                             if (addresses[j] == reservationStation[i].A)
                             {
-								isContinue = 1;
-                                wait = 2;
-								break;
-							}
-						}
+                                isContinue = 1;
+                                wait1 = 2;
+                                break;
+                            }
+                        }
                     }
-					if (isContinue == 1)
-					{
-                        continue;   
-					}
+                    if (isContinue == 1)
+                    {
+                        continue;
+                    }
 
-                    scheduleStation[reservationStation[i].instructionId].executionCycleStart = cycle - wait;
-                    scheduleStation[reservationStation[i].instructionId].executionCycleEnd = cycle + numberOfcycles[reservationStation[i].op] - 1 - wait;
+                    scheduleStation[reservationStation[i].instructionId].executionCycleStart = cycle - wait1;
+                    scheduleStation[reservationStation[i].instructionId].executionCycleEnd = cycle + numberOfcycles[reservationStation[i].op] - 1 - wait1;
 
                     isExecuted_in_functionsStack[numberOfJumps][reservationStation[i].instructionId] = true;
                     executeInstLogic(reservationStation[i], scheduleStation[reservationStation[i].instructionId].op);
@@ -408,7 +430,7 @@ void execute()
                     if (scheduleStation[reservationStation[i].instructionId].op == "LOAD" || scheduleStation[reservationStation[i].instructionId].op == "STORE")
                     {
                         addresses.push_back(scheduleStation[reservationStation[i].instructionId].imm);
-						wait = 0;
+                        wait1 = 0;
                     }
                     //map<int, bool> isExecuted = isExecuted_in_functionsStack[reservationStation[i].instructionId];
                     //return;
@@ -423,6 +445,7 @@ void execute()
 //flush the two instructions after the call
 void flush()
 {
+    flushes++;
     for (int i = 0; i < istructionsId.size(); i++)
     {
         scheduleStation[istructionsId[i]].issuingCycle = -1;
@@ -456,9 +479,9 @@ void writeResult()
         int i = getReservationStationIndex(scheduleStation[m].instructionId);
         if (i == -1)
         {
-			continue;
+            continue;
         }
-		
+
         if (reservationStation[i].busy)
         {
             if (scheduleStation[reservationStation[i].instructionId].executionCycleEnd + 1 <= cycle
@@ -610,11 +633,11 @@ void writeResult2()
 {
     for (int m = 0; m < scheduleStation.size(); m++)
     {
-        if ((scheduleStation[m].executionCycleEnd + 1 <= cycle && scheduleStation[m].executionCycleEnd != -1 && 
+        if ((scheduleStation[m].executionCycleEnd + 1 <= cycle && scheduleStation[m].executionCycleEnd != -1 &&
             isExecuted_in_functionsStack[numberOfJumps][m] == true &&
-            isWritten_in_functionsStack[numberOfJumps][m] == false) 
-            || (numberOfJumps > 0 && isExecuted_in_functionsStack[numberOfJumps-1][m] 
-                && isWritten_in_functionsStack[numberOfJumps - 1][m] == false)) 
+            isWritten_in_functionsStack[numberOfJumps][m] == false)
+            || (numberOfJumps > 0 && isExecuted_in_functionsStack[numberOfJumps - 1][m]
+                && isWritten_in_functionsStack[numberOfJumps - 1][m] == false))
         {
             if (m == scheduleStation.size() - 1)
                 isLastInstruction_v = 1;
@@ -626,17 +649,17 @@ void writeResult2()
             // if it is call set registers[1] to the return address which is the next instruction ctyle + 1
             if (scheduleStation[m].op == "CALL")
             {
-                registers[1] = m+1;
+                registers[1] = m + 1;
                 isJump = true;
                 jumpTo = scheduleStation[m].imm;
                 PC = jumpTo + m + 1;
                 isCall = 0;
-				for (int l = m+1; l < PC; l++)
-				{
-					isIssued_in_functionsStack[numberOfJumps][l] = true;
-				}
-				callIndex = m;
-                
+                for (int l = m + 1; l < PC; l++)
+                {
+                    isIssued_in_functionsStack[numberOfJumps][l] = true;
+                }
+                callIndex = m;
+
 
             }
             else if (scheduleStation[m].op == "RET") {
@@ -648,7 +671,7 @@ void writeResult2()
                 {
                     isIssued_in_functionsStack[numberOfJumps][l] = true;
                 }
-				isWritten_in_functionsStack[numberOfJumps-1][m] = true;
+                isWritten_in_functionsStack[numberOfJumps - 1][m] = true;
             }
             else if (scheduleStation[m].op == "BEQ") {
                 if (registers[scheduleStation[m].rB] == registers[scheduleStation[m].rC])
@@ -657,7 +680,7 @@ void writeResult2()
                     stop = scheduleStation.size();
                     flush();
                     PC = scheduleStation[m].imm + m - 1;
-                    if(scheduleStation[m].imm >0)
+                    if (scheduleStation[m].imm > 0)
                         PC = scheduleStation[m].imm + m + 1;
                     isBranchTaken_vr = 1;
                     lastWroteInstruction = PC - 1;
@@ -672,15 +695,15 @@ void writeResult2()
             else if (scheduleStation[m].op == "LOAD") {
                 int dest = scheduleStation[m].rA;
                 if (dest != 0) registers[dest] = memory[reservationStation[getReservationStationIndex(m)].result];
-				// remve the address from the addresses vector
-				for (int i = 0; i < addresses.size(); i++)
+                // remve the address from the addresses vector
+                for (int i = 0; i < addresses.size(); i++)
                 {
                     if (addresses[i] == reservationStation[getReservationStationIndex(m)].result)
                     {
-						addresses.erase(addresses.begin() + i);
-						break;
-					}
-				}
+                        addresses.erase(addresses.begin() + i);
+                        break;
+                    }
+                }
             }
             else if (scheduleStation[m].op == "STORE") {
                 memory[reservationStation[getReservationStationIndex(m)].result] = registers[scheduleStation[m].rA];
@@ -689,7 +712,7 @@ void writeResult2()
                 int dest = scheduleStation[m].rA;
                 if (dest != 0) registers[dest] = reservationStation[getReservationStationIndex(m)].result;
             }
-            
+
             else if (scheduleStation[m].op == "CALL") {
 
             }
@@ -699,25 +722,25 @@ void writeResult2()
 
             // I moved this a bit downwards as I needed the A for the store (nvm i don't need now but i left it here)
             scheduleStation[m].writingCycle = cycle;
-			isWritten_in_functionsStack[numberOfJumps][m] = true;
-            if(scheduleStation[m].op == "RET")
-				isWritten_in_functionsStack[numberOfJumps][m] = false;
+            isWritten_in_functionsStack[numberOfJumps][m] = true;
+            if (scheduleStation[m].op == "RET")
+                isWritten_in_functionsStack[numberOfJumps][m] = false;
             if (numberOfJumps > 0 && isExecuted_in_functionsStack[numberOfJumps - 1][m]
                 && isWritten_in_functionsStack[numberOfJumps - 1][m] == false && scheduleStation[m].op != "RET")
             {
                 isWritten_in_functionsStack[numberOfJumps][m] = false;
-                isWritten_in_functionsStack[numberOfJumps-1][m] = true;
+                isWritten_in_functionsStack[numberOfJumps - 1][m] = true;
                 scheduleStation[m].writingCycle = cycle + 1;
             }
-			lastWroteInstruction = m;
+            lastWroteInstruction = m;
             if (scheduleStation[m].op == "BEQ" && registers[scheduleStation[m].rB] == registers[scheduleStation[m].rC])
             {
                 lastWroteInstruction = PC - 1;
-                if(numberOfJumps>0)
+                if (numberOfJumps > 0)
                     isWritten_in_functionsStack[numberOfJumps][m] = false;
                 else
                 {
-					isWritten_in_functionsStack[numberOfJumps][m] = true;
+                    isWritten_in_functionsStack[numberOfJumps][m] = true;
                 }
                 numberOfJumps++;
                 for (int a = 0; a < PC; a++)
@@ -772,7 +795,7 @@ void writeResult2()
                     registerStatus[j].q = "";
                 }
             }
-                return;
+            return;
         }
     }
 }
@@ -906,26 +929,26 @@ void read_memory_file(string mem_file) {
     }
 }
 bool isAllTablesEmpty() {
-	bool reservationStationEmpty = true;
+    bool reservationStationEmpty = true;
     bool registerStatusEmpty = true;
-	for (int i = 0; i < NReservationStations; i++) {
+    for (int i = 0; i < NReservationStations; i++) {
         if (reservationStation[i].busy == true) {
-			reservationStationEmpty = false;
-			break;
-		}
-	}
-	for (int i = 0; i < NRegisters; i++) {
-		if (registerStatus[i].q != "") {
-			registerStatusEmpty = false;
-			break;
-		}
-	}
-	
-	return (reservationStationEmpty && registerStatusEmpty);
+            reservationStationEmpty = false;
+            break;
+        }
+    }
+    for (int i = 0; i < NRegisters; i++) {
+        if (registerStatus[i].q != "") {
+            registerStatusEmpty = false;
+            break;
+        }
+    }
+
+    return (reservationStationEmpty && registerStatusEmpty);
 }
 void taskManager() {
 
-    read_instructions_file("instructions1.txt");
+    read_instructions_file("instructions6.txt");
     read_memory_file("memory.txt");
     fillingInstructions();
     fillingReservationStation();
@@ -939,14 +962,14 @@ void taskManager() {
         issue();
         execute();
         writeResult2();
-        //print();
+        print();
         cycle++;
-       // cout << "---------------------------------------------------------------------------------------------------------------------------" << endl;
-        /*for (int i = 0; i < 8; i++) {
+        cout << "---------------------------------------------------------------------------------------------------------------------------" << endl;
+        for (int i = 0; i < 8; i++) {
             cout << "R" << i << ": " << registers[i] << "\n";
-        }*/
-        if(isAllTablesEmpty() == true && (writng_counter == scheduleStation.size() || isBranchTaken_vr && isLastInstruction_v))
-			break;
+        }
+        if (isAllTablesEmpty() == true && (writng_counter == scheduleStation.size() || isBranchTaken_vr && isLastInstruction_v))
+            break;
         /*if (writng_counter == scheduleStation.size() && !isJump)
             break;
         if (writng_counter == scheduleStation.size() && isLastInstruction_v)
@@ -957,12 +980,17 @@ void taskManager() {
     cout << "---------------------------------------------------------------------------------------------------------------------------" << endl;
     printScheduleStation();
     cout << "---------------------------------------------------------------------------------------------------------------------------" << endl;
+    cout << "Total number of cycles spanned: " << cycle << "\n";
+    cout << "IPC: " << float(scheduleStation.size()) / cycle << "\n";
+    if (numberOfBranches == 0) {
+        cout << "Branch misprediction rate: " << 0 << "\n";
+    }
+    else cout << "Branch misprediction rate: " << float(flushes) / numberOfBranches;
+    cout << "\n---------------------------------------------------Register Values---------------------------------------------------------" << endl;
     for (int i = 0; i < 8; i++) {
         cout << "R" << i << ": " << registers[i] << "\n";
     }
-    cout << "Memory[40]: " << memory[40];
 }
-
 int main() {
 
     taskManager();
